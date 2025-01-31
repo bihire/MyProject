@@ -55,8 +55,9 @@ void Scene_BulletNinja::init(const std::string& levelPath) {
 
 void Scene_BulletNinja::spawnPlayer(sf::Vector2f pos) {
     m_player = _entityManager.addEntity("player");
-    m_player->addComponent<CTransform>(pos);
-    m_player->addComponent<CBoundingBox>(sf::Vector2f(15.f, 15.f));
+    m_player->addComponent<CTransform>(pos).scale = sf::Vector2f(4.f, 4.f);
+    
+    m_player->addComponent<CBoundingBox>(sf::Vector2f(52.f, 52.f));
     m_player->addComponent<CInput>();
     m_player->addComponent<CAnimation>(Assets::getInstance().getAnimation("SamuraiIdle"));
 }
@@ -111,20 +112,7 @@ void Scene_BulletNinja::sMovement(sf::Time dt) {
     }
 }
 
-void Scene_BulletNinja::spawnLane10()
-{
-    sf::Vector2f position(350.0f, 600.0f - 460.0f);
-    sf::Vector2f velocity(50.0f, 0.0f);
 
-    for (int i = 0; i < 3; ++i)
-    {
-        auto tree = _entityManager.addEntity("tree");
-        tree->addComponent<CAnimation>(Assets::getInstance().getAnimation("tree1"));
-        tree->addComponent<CBoundingBox>(sf::Vector2f(70.0f, 15.0f));
-        tree->addComponent<CTransform>(position, velocity);
-        position.x -= 175.0f;
-    }
-}
 
 sf::FloatRect Scene_BulletNinja::getViewBounds() {
     return sf::FloatRect();
@@ -309,18 +297,25 @@ void Scene_BulletNinja::sRender()
         auto& tfm = e->getComponent<CTransform>();
         anim.getSprite().setPosition(tfm.pos);
         anim.getSprite().setRotation(tfm.angle);
+        anim.getSprite().setScale(tfm.scale);
         _game->window().draw(anim.getSprite());
 
         if (m_drawAABB) {
             if (e->hasComponent<CBoundingBox>()) {
                 auto box = e->getComponent<CBoundingBox>();
+                auto transform = e->getComponent<CTransform>();
                 sf::RectangleShape rect;
-                rect.setSize(sf::Vector2f{ box.size.x, box.size.y });
+                rect.setSize(sf::Vector2f{ box.size.x - 1.f, box.size.y * transform.scale.y/2.f });
                 centerOrigin(rect);
-                rect.setPosition(e->getComponent<CTransform>().pos);
+
+                auto position = e->getComponent<CTransform>().pos;
+                position.y = position.y - (box.size.y);
+                position.x = position.x - (box.size.x/2.f) -3.f;
+                rect.setPosition(position);
                 rect.setFillColor(sf::Color(0, 0, 0, 0));
                 rect.setOutlineColor(sf::Color{ 0, 255, 0 });
                 rect.setOutlineThickness(2.f);
+
                 _game->window().draw(rect);
             }
         }
@@ -347,10 +342,10 @@ void Scene_BulletNinja::sUpdate(sf::Time dt) {
     if (_isPaused)
         return;
 
-    m_timer -= dt;
+    /*m_timer -= dt;
 
     if (m_timer.asSeconds() <= 0)
-        killPlayer();
+        killPlayer();*/
 
     checkPlayerState();
 

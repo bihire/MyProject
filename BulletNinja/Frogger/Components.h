@@ -61,6 +61,8 @@ struct CTransform : public Component
     CTransform(const sf::Vector2f& p) : pos(p)  {}
     CTransform(const sf::Vector2f& p, const sf::Vector2f& v)
             : pos(p), prevPos(p),  vel(v){}
+    CTransform(const sf::Vector2f& p, const sf::Vector2f& v, const sf::Vector2f& s)
+        : pos(p), prevPos(p), vel(v), scale(s) {}
 
 };
 
