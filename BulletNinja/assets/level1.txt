@@ -1,5 +1,8 @@
 # Level 1
 
-World 480 600
+World 5600 600
+
+cameraReactionSpeed 75
+
 Bkg Background 0 0
 

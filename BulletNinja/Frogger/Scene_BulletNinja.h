@@ -12,13 +12,17 @@
 #include "Scene.h"
 #include "GameEngine.h"
 
+struct LevelConfig {
+    float       cameraReactionSpeed{ 100.f };
 
+};
 
 class Scene_BulletNinja : public Scene {
 private:
     sPtrEntt        m_player{ nullptr };
     sf::View        m_worldView;
     sf::FloatRect   m_worldBounds;
+    LevelConfig     m_config;
 
     bool			m_drawTextures{ true };
     bool			m_drawAABB{ false };
@@ -46,6 +50,7 @@ private:
     void            checkPlayerState();
     void	        registerActions();
     void            spawnPlayer(sf::Vector2f pos);
+    void            updateCamera();
 
  
 

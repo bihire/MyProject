@@ -29,17 +29,26 @@ Scene_BulletNinja::Scene_BulletNinja(GameEngine* gameEngine, const std::string& 
 
     m_text.setFont(Assets::getInstance().getFont("Arcade"));
 
+    sf::Vector2f spawnPos{   m_worldView.getSize().x / 2.f , m_worldView.getSize().y / 2.f };
+    std::cout << "=== m_worldBounds.width: " << m_worldBounds.width << "  m_worldView.y  " << m_worldView.getSize().y;
+
+
+    // _worldView is the camera. It's view is the same size as the render winwidow
+    // _worldBounds is the boundry of our game world.
+    // this is a vertical scroller, the camera starts at the bottlm of the game world bounds and scrolls up
+    // the player is spawned at the bottom of the world and the camera/game scroll up to the top of the world
+    m_worldView.setCenter(spawnPos);
     
 
-    auto pos = m_worldView.getSize();
+    //auto pos = m_worldView.getSize();
 
     // spawn frog in middle of first row
-    pos.x = pos.x / 2.f;
-    pos.y -= pos.y / 2.f;
-    spawnPlayer(pos);
+    /*pos.x = pos.x / 2.f;
+    pos.y -= pos.y / 2.f;*/
+    spawnPlayer(spawnPos);
 
     m_timer = sf::seconds(60.0f);
-    m_maxHeight = pos.y;
+    m_maxHeight = spawnPos.y;
     m_score = 0;
     m_lives = 3;
     m_reachGoal = 0;
@@ -70,6 +79,7 @@ void Scene_BulletNinja::playerMovement() {
     auto& dir = m_player->getComponent<CInput>().dir;
     auto& pos = m_player->getComponent<CTransform>().pos;
     
+    float speed = 5.f;
 
     if (dir & CInput::UP) {
         m_player->addComponent<CAnimation>(Assets::getInstance().getAnimation("up"));
@@ -80,31 +90,26 @@ void Scene_BulletNinja::playerMovement() {
         pos.y += 40.f;
     }
 
-     if (dir & CInput::LEFT) {
+    if (dir & CInput::LEFT) {
         if (m_player->getComponent<CState>().state != "SamuraiRunLeft") {
             m_player->getComponent<CState>().state = "SamuraiRunLeft";
             m_player->addComponent<CAnimation>(Assets::getInstance().getAnimation("SamuraiRun"));
-            
+
             auto trans = m_player->getComponent<CTransform>().scale;
             m_player->getComponent<CTransform>().scale.x = -std::abs(trans.x);
-            
-            
         }
-        
-        pos.x -= 1.f;
+        pos.x -= speed;
     }
 
     if (dir & CInput::RIGHT) {
         if (m_player->getComponent<CState>().state != "SamuraiRunRight") {
             m_player->getComponent<CState>().state = "SamuraiRunRight";
             m_player->addComponent<CAnimation>(Assets::getInstance().getAnimation("SamuraiRun"));
+
             auto trans = m_player->getComponent<CTransform>().scale;
             m_player->getComponent<CTransform>().scale.x = std::abs(trans.x);
-            
         }
-        
-        pos.x += 1.f;
-        
+        pos.x += speed;
     }
         
 
@@ -112,7 +117,33 @@ void Scene_BulletNinja::playerMovement() {
         SoundPlayer::getInstance().play("hop", m_player->getComponent<CTransform>().pos);
         dir = 0;
     }
+
+    updateCamera();
 }
+void Scene_BulletNinja::updateCamera() {
+    auto& playerPos = m_player->getComponent<CTransform>().pos;
+    sf::Vector2f viewSize = m_worldView.getSize();
+
+    float halfViewWidth = viewSize.x / 2.f;
+    float leftBound = halfViewWidth;
+    float rightBound = m_worldBounds.width - halfViewWidth;
+
+    sf::Vector2f newCenter = m_worldView.getCenter();
+
+    
+    if (playerPos.x < leftBound) {
+        newCenter.x = leftBound;
+    }
+    else if (playerPos.x > rightBound) {
+        newCenter.x = rightBound;
+    }
+    else {
+        newCenter.x = playerPos.x; 
+    }
+
+    m_worldView.setCenter(newCenter);
+}
+
 void Scene_BulletNinja::sMovement(sf::Time dt) {
     playerMovement();
 
@@ -204,6 +235,13 @@ void Scene_BulletNinja::loadLevel(const std::string& path) {
             sprite.setOrigin(0.f, 0.f);
             sprite.setPosition(pos);*/
             
+        }
+        else if (token == "World") {
+            config >> m_worldBounds.width >> m_worldBounds.height;
+            
+        }
+        else if (token == "cameraReactionSpeed") {
+            config >> m_config.cameraReactionSpeed;
         }
         else if (token[0] == '#') {
             std::cout << token;
@@ -352,6 +390,8 @@ void Scene_BulletNinja::sRender()
             }
         }
     }
+
+    _game->window().setView(_game->window().getDefaultView());
 
     m_text.setPosition(5.0f, -5.0f);
     m_text.setString("score  " + std::to_string(m_score));
