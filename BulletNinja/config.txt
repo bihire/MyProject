@@ -1,6 +1,6 @@
 # GameEngine Config
 
-Window  480 600
+Window  600 600
 
 Font    Arial           ../assets/fonts/arial.ttf
 Font    main            ../assets/fonts/Sansation.ttf
@@ -63,3 +63,5 @@ Animation       lillyPad        Entities    1        no
 Animation       lives           Entities    1        no
 
 Animation       SamuraiIdle     SamuraiIdle    10     yes
+Animation       SamuraiRun     SamuraiRun    10     yes
+

@@ -56,7 +56,7 @@ void Scene_BulletNinja::init(const std::string& levelPath) {
 void Scene_BulletNinja::spawnPlayer(sf::Vector2f pos) {
     m_player = _entityManager.addEntity("player");
     m_player->addComponent<CTransform>(pos).scale = sf::Vector2f(4.f, 4.f);
-    
+    m_player->addComponent<CState>().state = "idle";
     m_player->addComponent<CBoundingBox>(sf::Vector2f(52.f, 52.f));
     m_player->addComponent<CInput>();
     m_player->addComponent<CAnimation>(Assets::getInstance().getAnimation("SamuraiIdle"));
@@ -69,6 +69,7 @@ void Scene_BulletNinja::playerMovement() {
 
     auto& dir = m_player->getComponent<CInput>().dir;
     auto& pos = m_player->getComponent<CTransform>().pos;
+    
 
     if (dir & CInput::UP) {
         m_player->addComponent<CAnimation>(Assets::getInstance().getAnimation("up"));
@@ -79,15 +80,33 @@ void Scene_BulletNinja::playerMovement() {
         pos.y += 40.f;
     }
 
-    if (dir & CInput::LEFT) {
-        m_player->addComponent<CAnimation>(Assets::getInstance().getAnimation("left"));
-        pos.x -= 40.f;
+     if (dir & CInput::LEFT) {
+        if (m_player->getComponent<CState>().state != "SamuraiRunLeft") {
+            m_player->getComponent<CState>().state = "SamuraiRunLeft";
+            m_player->addComponent<CAnimation>(Assets::getInstance().getAnimation("SamuraiRun"));
+            
+            auto trans = m_player->getComponent<CTransform>().scale;
+            m_player->getComponent<CTransform>().scale.x = -std::abs(trans.x);
+            
+            
+        }
+        
+        pos.x -= 1.f;
     }
 
     if (dir & CInput::RIGHT) {
-        m_player->addComponent<CAnimation>(Assets::getInstance().getAnimation("right"));
-        pos.x += 40.f;
+        if (m_player->getComponent<CState>().state != "SamuraiRunRight") {
+            m_player->getComponent<CState>().state = "SamuraiRunRight";
+            m_player->addComponent<CAnimation>(Assets::getInstance().getAnimation("SamuraiRun"));
+            auto trans = m_player->getComponent<CTransform>().scale;
+            m_player->getComponent<CTransform>().scale.x = std::abs(trans.x);
+            
+        }
+        
+        pos.x += 1.f;
+        
     }
+        
 
     if (dir != 0) {
         SoundPlayer::getInstance().play("hop", m_player->getComponent<CTransform>().pos);
@@ -181,9 +200,10 @@ void Scene_BulletNinja::loadLevel(const std::string& path) {
             // for background, no textureRect its just the whole texture
             // and no center origin, position by top left corner
             // stationary so no CTransfrom required.
-            auto& sprite = e->addComponent<CSprite>(Assets::getInstance().getTexture(name)).sprite;
+            /*auto& sprite = e->addComponent<CSprite>(Assets::getInstance().getTexture(name)).sprite;
             sprite.setOrigin(0.f, 0.f);
-            sprite.setPosition(pos);
+            sprite.setPosition(pos);*/
+            
         }
         else if (token[0] == '#') {
             std::cout << token;
@@ -207,28 +227,40 @@ void Scene_BulletNinja::update(sf::Time dt)
 
 void Scene_BulletNinja::sDoAction(const Command& action)
 {
+    auto& input = m_player->getComponent<CInput>();
     //// On Key Press
     if (action.type() == "START") {
         if (action.name() == "PAUSE") { setPaused(!_isPaused); }
         else if (action.name() == "QUIT") { _game->quitLevel(); }
         else if (action.name() == "BACK") { _game->backLevel(); }
-
         else if (action.name() == "TOGGLE_TEXTURE") { m_drawTextures = !m_drawTextures; }
         else if (action.name() == "TOGGLE_COLLISION") { m_drawAABB = !m_drawAABB; }
         else if (action.name() == "TOGGLE_GRID") { m_drawGrid = !m_drawGrid; }
-    
-        // Player control
-        if (action.name() == "LEFT") { m_player->getComponent<CInput>().dir = CInput::LEFT; }
-        else if (action.name() == "RIGHT") { m_player->getComponent<CInput>().dir = CInput::RIGHT; }
-        else if (action.name() == "UP") { m_player->getComponent<CInput>().dir = CInput::UP; }
-        else if (action.name() == "DOWN") { m_player->getComponent<CInput>().dir = CInput::DOWN; }
+
+        // Set movement state to "running"
+        //m_player->getComponent<CState>().state = "running";
+
+        // Set direction using bitwise OR (|=) to allow multiple directions
+        if (action.name() == "LEFT") { input.dir |= CInput::LEFT; }
+        if (action.name() == "RIGHT") { input.dir |= CInput::RIGHT; }
+        if (action.name() == "UP") { input.dir |= CInput::UP; }
+        if (action.name() == "DOWN") { input.dir |= CInput::DOWN; }
     }
     
-    //// the frog can only go in one direction at a time, no angles
     
-    else if (action.type() == "END" && (action.name() == "LEFT" || action.name() == "RIGHT" || action.name() == "UP" ||
-        action.name() == "DOWN")) {
-        m_player->getComponent<CInput>().dir = 0;
+    
+    else if (action.type() == "END") {
+        if (action.name() == "LEFT") { input.dir &= ~CInput::LEFT; }
+        if (action.name() == "RIGHT") { input.dir &= ~CInput::RIGHT; }
+        if (action.name() == "UP") { input.dir &= ~CInput::UP; }
+        if (action.name() == "DOWN") { input.dir &= ~CInput::DOWN; }
+
+        // If no movement keys are pressed, set state to "idle"
+        if (input.dir == 0) {
+            m_player->getComponent<CState>().state = "idle";
+            m_player->addComponent<CAnimation>(Assets::getInstance().getAnimation("SamuraiIdle"));
+            m_player->getComponent<CInput>().dir = 0;
+        }
     }
 }
     

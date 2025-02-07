@@ -47,18 +47,7 @@ private:
     void	        registerActions();
     void            spawnPlayer(sf::Vector2f pos);
 
-    void            spawnLane1();
-    void            spawnLane2();
-    void            spawnLane3();
-    void            spawnLane4();
-    void            spawnLane5();
-    void            spawnLane6();
-    void            spawnLane7();
-    void            spawnLane8();
-    void            spawnLane9();
-    void            spawnLane10();
-    void            spawnGoal();
-    void            spawnLives();
+ 
 
     void            resetPlayer();
     void            killPlayer();

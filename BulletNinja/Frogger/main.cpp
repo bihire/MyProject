@@ -2,11 +2,11 @@
 //
 //  Assignment:
 //  Instructor:     David Burchill
-//  Year / Term:    Fall 2023
+//  Year / Term:    Fall 2025
 //  File name:      Source.cpp
 //
-//  Student name:   Guilherme Bouvie Trentini
-//  Student email:  GBOUVIETRENTINI01@MYNBCC.CA
+//  Student name:   Bihire Jules Boris
+//  Student email:  BIHIREJULESBORIS@MYNBCC.CA
 //
 //     I certify that this work is my work only, any work copied from Stack Overflow, textbooks,
 //     or elsewhere is properly cited.

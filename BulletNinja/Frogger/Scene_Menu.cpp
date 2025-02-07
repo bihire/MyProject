@@ -25,14 +25,14 @@ void Scene_Menu::init()
 	registerAction(sf::Keyboard::Escape, "QUIT");
 	registerAction(sf::Keyboard::Backspace, "PAUSE");
 
-	m_title = "FROGGER";
-	m_menuStrings.push_back("Level 1");
-	m_menuStrings.push_back("Level 2");
-	m_menuStrings.push_back("Level 3");
+	m_title = "Bullet Ninja";
+	m_menuStrings.push_back("Play");
+	/*m_menuStrings.push_back("Level 2");
+	m_menuStrings.push_back("Level 3");*/
 
 	m_levelPaths.push_back("../assets/level1.txt");
-	m_levelPaths.push_back("../assets/level1.txt");
-	m_levelPaths.push_back("../assets/level1.txt");
+	/*m_levelPaths.push_back("../assets/level1.txt");
+	m_levelPaths.push_back("../assets/level1.txt");*/
 
 	m_menuText.setFont(Assets::getInstance().getFont("main"));
 
