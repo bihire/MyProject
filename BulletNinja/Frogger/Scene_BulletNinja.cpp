@@ -45,7 +45,10 @@ Scene_BulletNinja::Scene_BulletNinja(GameEngine* gameEngine, const std::string& 
     // spawn frog in middle of first row
     /*pos.x = pos.x / 2.f;
     pos.y -= pos.y / 2.f;*/
+    
     spawnPlayer(spawnPos);
+    spawnPos.x = spawnPos.x + 200.f;
+    spawnBox(spawnPos);
 
     m_timer = sf::seconds(60.0f);
     m_maxHeight = spawnPos.y;
@@ -69,6 +72,58 @@ void Scene_BulletNinja::spawnPlayer(sf::Vector2f pos) {
     m_player->addComponent<CBoundingBox>(sf::Vector2f(52.f, 52.f));
     m_player->addComponent<CInput>();
     m_player->addComponent<CAnimation>(Assets::getInstance().getAnimation("SamuraiIdle"));
+}
+
+void Scene_BulletNinja::spawnBox(sf::Vector2f pos) {
+    auto m_box = _entityManager.addEntity("box");
+    const sf::Texture& texture = Assets::getInstance().getTexture("box");
+    m_box->addComponent<CTransform>(pos).scale = sf::Vector2f(.5f, .5f);
+    //m_player->addComponent<CState>().state = "idle";
+    m_box->addComponent<CBoundingBox>(sf::Vector2f(40.f, 40.f));
+    m_box->addComponent<CInput>();
+    m_box->addComponent<CSprite>(texture).sprite;
+}
+
+void Scene_BulletNinja::playerAttacks() {
+    if (m_player->hasComponent<CState>() && m_player->getComponent<CState>().state == "dead")
+        return;
+
+    auto& attack = m_player->getComponent<CInput>().attack;
+    auto& pos = m_player->getComponent<CTransform>().pos;
+
+    float speed = 5.f;
+
+    
+
+    if (attack & CInput::SWORD) {
+        if (m_player->getComponent<CState>().state != "SamuraiAttackSword") {
+            m_player->getComponent<CState>().state = "SamuraiAttackSword";
+            m_player->addComponent<CAnimation>(Assets::getInstance().getAnimation("SamuraiAttackSword"));
+
+            /*auto trans = m_player->getComponent<CTransform>().scale;
+            m_player->getComponent<CTransform>().scale.x = -std::abs(trans.x);*/
+        }
+        //pos.x -= speed;
+    }
+
+    if (attack & CInput::SPEAR) {
+        if (m_player->getComponent<CState>().state != "SamuraiAttackSpear") {
+            m_player->getComponent<CState>().state = "SamuraiAttackSpear";
+            m_player->addComponent<CAnimation>(Assets::getInstance().getAnimation("SamuraiAttackSpear"));
+
+            //auto trans = m_player->getComponent<CTransform>().scale;
+            //m_player->getComponent<CTransform>().scale.x = std::abs(trans.x);
+        }
+        //pos.x += speed;
+    }
+
+
+    if (attack != 0) {
+        SoundPlayer::getInstance().play("hop", m_player->getComponent<CTransform>().pos);
+        attack = 0;
+    }
+
+    updateCamera();
 }
 
 void Scene_BulletNinja::playerMovement() {
@@ -146,6 +201,7 @@ void Scene_BulletNinja::updateCamera() {
 
 void Scene_BulletNinja::sMovement(sf::Time dt) {
     playerMovement();
+    playerAttacks();
 
     // move all objects
     for (auto e : _entityManager.getEntities()) {
@@ -201,13 +257,16 @@ void Scene_BulletNinja::registerActions() {
     registerAction(sf::Keyboard::Q, "QUIT");
     registerAction(sf::Keyboard::C, "TOGGLE_COLLISION");
 
-    registerAction(sf::Keyboard::A, "LEFT");
+    //registerAction(sf::Keyboard::A, "LEFT");
     registerAction(sf::Keyboard::Left, "LEFT");
-    registerAction(sf::Keyboard::D, "RIGHT");
+
+    registerAction(sf::Keyboard::A, "ATTACKSWORD");
+    registerAction(sf::Keyboard::S, "ATTACKSPEAR");
+
     registerAction(sf::Keyboard::Right, "RIGHT");
     registerAction(sf::Keyboard::W, "UP");
     registerAction(sf::Keyboard::Up, "UP");
-    registerAction(sf::Keyboard::S, "DOWN");
+    
     registerAction(sf::Keyboard::Down, "DOWN");
 }
 
@@ -275,6 +334,11 @@ void Scene_BulletNinja::sDoAction(const Command& action)
         else if (action.name() == "TOGGLE_COLLISION") { m_drawAABB = !m_drawAABB; }
         else if (action.name() == "TOGGLE_GRID") { m_drawGrid = !m_drawGrid; }
 
+
+        //Set attacks
+        if (action.name() == "ATTACKSWORD") { input.attack |= CInput::SWORD; }
+        if (action.name() == "ATTACKSPEAR") { input.attack |= CInput::SPEAR; }
+
         // Set movement state to "running"
         //m_player->getComponent<CState>().state = "running";
 
@@ -283,6 +347,11 @@ void Scene_BulletNinja::sDoAction(const Command& action)
         if (action.name() == "RIGHT") { input.dir |= CInput::RIGHT; }
         if (action.name() == "UP") { input.dir |= CInput::UP; }
         if (action.name() == "DOWN") { input.dir |= CInput::DOWN; }
+
+        
+
+
+
     }
     
     
@@ -299,6 +368,12 @@ void Scene_BulletNinja::sDoAction(const Command& action)
             m_player->addComponent<CAnimation>(Assets::getInstance().getAnimation("SamuraiIdle"));
             m_player->getComponent<CInput>().dir = 0;
         }
+
+        /*if (input.attack == 0) {
+            m_player->getComponent<CState>().state = "idle";
+            m_player->addComponent<CAnimation>(Assets::getInstance().getAnimation("SamuraiIdle"));
+            m_player->getComponent<CInput>().attack = 0;
+        }*/
     }
 }
     
@@ -347,6 +422,59 @@ void Scene_BulletNinja::updateScore()
     }
 }
 
+void Scene_BulletNinja::drawAABB(std::shared_ptr<Entity> e) {
+    if (m_drawAABB) {
+        /*auto box = e->getComponent<CBoundingBox>();
+        sf::RectangleShape rect;
+        rect.setSize(sf::Vector2f{ box.size.x * 2, box.size.y * 2 });
+        centerOrigin(rect);
+        rect.setPosition(e->getComponent<CTransform>().pos);
+        rect.setFillColor(sf::Color(0, 0, 0, 0));
+        rect.setOutlineColor(sf::Color{ 0, 255, 0 });
+        rect.setOutlineThickness(2.f);
+        _game->window().draw(rect);*/
+        auto box = e->getComponent<CBoundingBox>();
+        auto transform = e->getComponent<CTransform>();
+
+        sf::RectangleShape rect;
+
+        auto& size = box.size;
+        auto position = e->getComponent<CTransform>().pos;
+
+        auto& cmp = e->getTag();
+        if (cmp == "box") {
+            size = sf::Vector2f{ box.size.x * 2, box.size.y * 2 };
+        }
+
+        if (cmp == "player" && e->getComponent<CState>().state == "idle") {
+            size = sf::Vector2f{ box.size.x - 1.f, box.size.y * transform.scale.y / 2.f };
+            position = sf::Vector2f{ position.x - (box.size.x / 2.f) - 3.f, position.y - (box.size.y/2.f) };
+        }
+
+        if (cmp == "player" && e->getComponent<CState>().state == "SamuraiAttackSword") {
+            size = sf::Vector2f{ box.size.x * 6.4f, box.size.y * transform.scale.y / 1.3f };
+            position = sf::Vector2f{ (position.x * 2.f) - (box.size.x) + 50.f, position.y - (box.size.y / 2) };
+        }
+
+        if (cmp == "player" && e->getComponent<CState>().state == "SamuraiAttackSpear") {
+            size = sf::Vector2f{ box.size.x * 6.4f, box.size.y * transform.scale.y / 1.3f };
+            position = sf::Vector2f{  (position.x * 2.f) - (box.size.x ) + 50.f, position.y - (box.size.y/2) };
+        }
+        
+
+        rect.setSize(size);
+        centerOrigin(rect);
+
+        rect.setPosition(position);
+        rect.setFillColor(sf::Color(0, 0, 0, 0));
+        rect.setOutlineColor(sf::Color{ 0, 255, 0 });
+        rect.setOutlineThickness(2.f);
+        _game->window().draw(rect);
+        
+
+    }
+}
+
 void Scene_BulletNinja::sRender()
 {
     _game->window().setView(m_worldView);
@@ -356,6 +484,20 @@ void Scene_BulletNinja::sRender()
         if (e->getComponent<CSprite>().has) {
             auto& sprite = e->getComponent<CSprite>().sprite;
             _game->window().draw(sprite);
+        }
+    }
+
+    for (auto e : _entityManager.getEntities("box")) {
+        if (e->getComponent<CSprite>().has) {
+            auto& anim = e->getComponent<CSprite>().sprite;
+            auto& tfm = e->getComponent<CTransform>();
+            anim.setPosition(tfm.pos);
+            anim.setRotation(tfm.angle);
+            anim.setScale(tfm.scale);
+
+            drawAABB(e);
+            
+            _game->window().draw(anim);
         }
     }
     for (auto& e : _entityManager.getEntities()) {
@@ -370,25 +512,8 @@ void Scene_BulletNinja::sRender()
         anim.getSprite().setScale(tfm.scale);
         _game->window().draw(anim.getSprite());
 
-        if (m_drawAABB) {
-            if (e->hasComponent<CBoundingBox>()) {
-                auto box = e->getComponent<CBoundingBox>();
-                auto transform = e->getComponent<CTransform>();
-                sf::RectangleShape rect;
-                rect.setSize(sf::Vector2f{ box.size.x - 1.f, box.size.y * transform.scale.y/2.f });
-                centerOrigin(rect);
+        drawAABB(e);
 
-                auto position = e->getComponent<CTransform>().pos;
-                position.y = position.y - (box.size.y);
-                position.x = position.x - (box.size.x/2.f) -3.f;
-                rect.setPosition(position);
-                rect.setFillColor(sf::Color(0, 0, 0, 0));
-                rect.setOutlineColor(sf::Color{ 0, 255, 0 });
-                rect.setOutlineThickness(2.f);
-
-                _game->window().draw(rect);
-            }
-        }
     }
 
     _game->window().setView(_game->window().getDefaultView());

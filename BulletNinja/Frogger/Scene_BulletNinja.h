@@ -46,10 +46,12 @@ private:
 
     // helper functions
     void            playerMovement();
+    void            playerAttacks();
     void            adjustPlayerPosition();
     void            checkPlayerState();
     void	        registerActions();
     void            spawnPlayer(sf::Vector2f pos);
+    void            spawnBox(sf::Vector2f pos);
     void            updateCamera();
 
  
@@ -70,6 +72,8 @@ public:
     void		  update(sf::Time dt) override;
     void		  sDoAction(const Command& command) override;
     void		  sRender() override;
+
+    void          drawAABB(std::shared_ptr<Entity> e);
 
 };
 

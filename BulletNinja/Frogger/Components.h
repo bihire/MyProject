@@ -94,9 +94,16 @@ struct CInput : public Component
         DOWN    = 1 << 1,
         LEFT    = 1 << 2,
         RIGHT   = 1 << 3
+        
+    };
+
+    enum attacks {
+        SWORD = 1 << 0,
+        SPEAR = 1 << 1
     };
 
     unsigned char dir{0};
+    unsigned char attack{0};
 
     CInput() = default;
 };

@@ -18,6 +18,7 @@ Texture SamuraiIdle        ../assets/Textures/SamuraiIdle.png
 Texture SamuraiRun        ../assets/Textures/SamuraiRun.png
 Texture SamuraiAttackSpear        ../assets/Textures/SamuraiAttackSpear.png
 Texture SamuraiAttackSword        ../assets/Textures/SamuraiAttackSword.png
+Texture box        ../assets/Textures/box_cropped.png
 
 # Sprites
 Sprite Background       Background   0 0  480 600
@@ -62,6 +63,8 @@ Animation       frogIcon        Entities    1        no
 Animation       lillyPad        Entities    1        no
 Animation       lives           Entities    1        no
 
-Animation       SamuraiIdle     SamuraiIdle    10     yes
-Animation       SamuraiRun     SamuraiRun    10     yes
+Animation       SamuraiIdle     	SamuraiIdle    		7     yes
+Animation       SamuraiRun     		SamuraiRun    		7     yes
+Animation       SamuraiAttackSpear     	SamuraiAttackSpear    	27     yes
+Animation       SamuraiAttackSword     	SamuraiAttackSword    	27     yes
 
