@@ -1,0 +1,204 @@
+{
+  "frames": [
+    {
+      "filename": "PlayerAttackSword (0).png",
+      "frame": { "x": 0, "y": 0, "w": 192, "h": 192 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
+      "sourceSize": { "w": 192, "h": 192 }
+    },
+    {
+      "filename": "PlayerAttackSword (1).png",
+      "frame": { "x": 192, "y": 0, "w": 192, "h": 192 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
+      "sourceSize": { "w": 192, "h": 192 }
+    },
+    {
+      "filename": "PlayerAttackSword (2).png",
+      "frame": { "x": 384, "y": 0, "w": 192, "h": 192 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
+      "sourceSize": { "w": 192, "h": 192 }
+    },
+    {
+      "filename": "PlayerAttackSword (3).png",
+      "frame": { "x": 576, "y": 0, "w": 192, "h": 192 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
+      "sourceSize": { "w": 192, "h": 192 }
+    },
+    {
+      "filename": "PlayerAttackSword (4).png",
+      "frame": { "x": 768, "y": 0, "w": 192, "h": 192 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
+      "sourceSize": { "w": 192, "h": 192 }
+    },
+    {
+      "filename": "PlayerAttackSword (5).png",
+      "frame": { "x": 0, "y": 192, "w": 192, "h": 192 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
+      "sourceSize": { "w": 192, "h": 192 }
+    },
+    {
+      "filename": "PlayerAttackSword (6).png",
+      "frame": { "x": 192, "y": 192, "w": 192, "h": 192 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
+      "sourceSize": { "w": 192, "h": 192 }
+    },
+    {
+      "filename": "PlayerAttackSword (7).png",
+      "frame": { "x": 384, "y": 192, "w": 192, "h": 192 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
+      "sourceSize": { "w": 192, "h": 192 }
+    },
+    {
+      "filename": "PlayerAttackSword (8).png",
+      "frame": { "x": 576, "y": 192, "w": 192, "h": 192 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
+      "sourceSize": { "w": 192, "h": 192 }
+    },
+    {
+      "filename": "PlayerAttackSword (9).png",
+      "frame": { "x": 768, "y": 192, "w": 192, "h": 192 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
+      "sourceSize": { "w": 192, "h": 192 }
+    },
+    {
+      "filename": "PlayerAttackSword (10).png",
+      "frame": { "x": 0, "y": 384, "w": 192, "h": 192 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
+      "sourceSize": { "w": 192, "h": 192 }
+    },
+    {
+      "filename": "PlayerAttackSword (11).png",
+      "frame": { "x": 192, "y": 384, "w": 192, "h": 192 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
+      "sourceSize": { "w": 192, "h": 192 }
+    },
+    {
+      "filename": "PlayerAttackSword (12).png",
+      "frame": { "x": 384, "y": 384, "w": 192, "h": 192 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
+      "sourceSize": { "w": 192, "h": 192 }
+    },
+    {
+      "filename": "PlayerAttackSword (13).png",
+      "frame": { "x": 576, "y": 384, "w": 192, "h": 192 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
+      "sourceSize": { "w": 192, "h": 192 }
+    },
+    {
+      "filename": "PlayerAttackSword (14).png",
+      "frame": { "x": 768, "y": 384, "w": 192, "h": 192 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
+      "sourceSize": { "w": 192, "h": 192 }
+    },
+    {
+      "filename": "PlayerAttackSword (15).png",
+      "frame": { "x": 0, "y": 576, "w": 192, "h": 192 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
+      "sourceSize": { "w": 192, "h": 192 }
+    },
+    {
+      "filename": "PlayerAttackSword (16).png",
+      "frame": { "x": 192, "y": 576, "w": 192, "h": 192 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
+      "sourceSize": { "w": 192, "h": 192 }
+    },
+    {
+      "filename": "PlayerAttackSword (17).png",
+      "frame": { "x": 384, "y": 576, "w": 192, "h": 192 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
+      "sourceSize": { "w": 192, "h": 192 }
+    },
+    {
+      "filename": "PlayerAttackSword (18).png",
+      "frame": { "x": 576, "y": 576, "w": 192, "h": 192 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
+      "sourceSize": { "w": 192, "h": 192 }
+    },
+    {
+      "filename": "PlayerAttackSword (19).png",
+      "frame": { "x": 768, "y": 576, "w": 192, "h": 192 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
+      "sourceSize": { "w": 192, "h": 192 }
+    },
+    {
+      "filename": "PlayerAttackSword (20).png",
+      "frame": { "x": 0, "y": 768, "w": 192, "h": 192 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
+      "sourceSize": { "w": 192, "h": 192 }
+    },
+    {
+      "filename": "PlayerAttackSword (21).png",
+      "frame": { "x": 192, "y": 768, "w": 192, "h": 192 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
+      "sourceSize": { "w": 192, "h": 192 }
+    },
+    {
+      "filename": "PlayerAttackSword (22).png",
+      "frame": { "x": 384, "y": 768, "w": 192, "h": 192 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
+      "sourceSize": { "w": 192, "h": 192 }
+    },
+    {
+      "filename": "PlayerAttackSword (23).png",
+      "frame": { "x": 0, "y": 0, "w": 192, "h": 192 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
+      "sourceSize": { "w": 192, "h": 192 }
+    }
+  ],
+  "meta": {
+    "app": "https://www.codeandweb.com/texturepacker",
+    "version": "1.0",
+    "image": "playerAttackSword.png",
+    "format": "RGBA8888",
+    "size": { "w": 960, "h": 960 },
+    "scale": "1"
+  }
+}

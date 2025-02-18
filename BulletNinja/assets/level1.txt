@@ -2,7 +2,8 @@
 
 World 5600 600
 
-cameraReactionSpeed 75
+#EntitySpeeds			camera		player		enemy
+Speeds 				  75		  2		  1
 
 Bkg Background 0 0
 
