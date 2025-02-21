@@ -30,7 +30,7 @@ Scene_BulletNinja::Scene_BulletNinja(GameEngine* gameEngine, const std::string& 
     m_text.setFont(Assets::getInstance().getFont("Arcade"));
 
     sf::Vector2f spawnPos{   m_worldView.getSize().x / 2.f , m_worldView.getSize().y / 2.f };
-    std::cout << "=== m_worldBounds.width: " << m_worldBounds.width << "  m_worldView.y  " << m_worldView.getSize().y;
+    std::cout << "=== m_worldBounds.width: " << m_worldBounds.width << "  m_worldView.y  " << m_worldView.getSize().y << "\n";
 
 
     // _worldView is the camera. It's view is the same size as the render winwidow
@@ -42,13 +42,17 @@ Scene_BulletNinja::Scene_BulletNinja(GameEngine* gameEngine, const std::string& 
 
     //auto pos = m_worldView.getSize();
 
-    // spawn frog in middle of first row
-    /*pos.x = pos.x / 2.f;
-    pos.y -= pos.y / 2.f;*/
+    // To refactor
+    auto playerPos = sf::Vector2f{ spawnPos.x, spawnPos.y + 40.f };
+    auto boxPos = sf::Vector2f{ spawnPos.x + 200.f, spawnPos.y };
+    auto ePos = sf::Vector2f{ boxPos.x + 200.f, playerPos.y };
+    spawnPlayer(playerPos);
     
-    spawnPlayer(spawnPos);
-    spawnPos.x = spawnPos.x + 200.f;
-    spawnBox(spawnPos);
+
+    spawnBox(boxPos);
+
+
+    spawnEnemy(ePos);
 
     m_timer = sf::seconds(60.0f);
     m_maxHeight = spawnPos.y;
@@ -71,7 +75,21 @@ void Scene_BulletNinja::spawnPlayer(sf::Vector2f pos) {
     m_player->addComponent<CState>().state = "idle";
     m_player->addComponent<CBoundingBox>(sf::Vector2f(52.f, 52.f));
     m_player->addComponent<CInput>();
-    m_player->addComponent<CAnimation>(Assets::getInstance().getAnimation("SamuraiIdle"));
+    m_player->addComponent<CAnimation>(Assets::getInstance().getAnimation("PlayerIdle"));
+}
+
+void Scene_BulletNinja::spawnEnemy(sf::Vector2f pos) {
+    auto enemy = _entityManager.addEntity("enemy");
+    enemy->addComponent<CTransform>();
+    enemy->addComponent<CState>().state = "idle";
+    enemy->addComponent<CBoundingBox>(sf::Vector2f(52.f, 52.f));
+    enemy->addComponent<CAnimation>(Assets::getInstance().getAnimation("SamuraiIdle"));
+
+    auto& transform = enemy->getComponent<CTransform>();
+    transform.pos = pos;
+    transform.scale = sf::Vector2f(4.f, 4.f);
+    transform.vel = sf::Vector2f(m_config.enemySpeed, m_config.enemySpeed);
+    
 }
 
 void Scene_BulletNinja::spawnBox(sf::Vector2f pos) {
@@ -96,9 +114,9 @@ void Scene_BulletNinja::playerAttacks() {
     
 
     if (attack & CInput::SWORD) {
-        if (m_player->getComponent<CState>().state != "SamuraiAttackSword") {
-            m_player->getComponent<CState>().state = "SamuraiAttackSword";
-            m_player->addComponent<CAnimation>(Assets::getInstance().getAnimation("SamuraiAttackSword"));
+        if (m_player->getComponent<CState>().state != "PlayerAttackSword") {
+            m_player->getComponent<CState>().state = "PlayerAttackSword";
+            m_player->addComponent<CAnimation>(Assets::getInstance().getAnimation("PlayerAttackSword"));
 
             /*auto trans = m_player->getComponent<CTransform>().scale;
             m_player->getComponent<CTransform>().scale.x = -std::abs(trans.x);*/
@@ -107,9 +125,9 @@ void Scene_BulletNinja::playerAttacks() {
     }
 
     if (attack & CInput::SPEAR) {
-        if (m_player->getComponent<CState>().state != "SamuraiAttackSpear") {
-            m_player->getComponent<CState>().state = "SamuraiAttackSpear";
-            m_player->addComponent<CAnimation>(Assets::getInstance().getAnimation("SamuraiAttackSpear"));
+        if (m_player->getComponent<CState>().state != "PlayerAttackSpear") {
+            m_player->getComponent<CState>().state = "PlayerAttackSpear";
+            m_player->addComponent<CAnimation>(Assets::getInstance().getAnimation("PlayerAttackSpear"));
 
             //auto trans = m_player->getComponent<CTransform>().scale;
             //m_player->getComponent<CTransform>().scale.x = std::abs(trans.x);
@@ -137,18 +155,16 @@ void Scene_BulletNinja::playerMovement() {
     float speed = 5.f;
 
     if (dir & CInput::UP) {
-        m_player->addComponent<CAnimation>(Assets::getInstance().getAnimation("up"));
-        pos.y -= 40.f;
+        
     }
     if (dir & CInput::DOWN) {
-        m_player->addComponent<CAnimation>(Assets::getInstance().getAnimation("down"));
-        pos.y += 40.f;
+        
     }
 
     if (dir & CInput::LEFT) {
-        if (m_player->getComponent<CState>().state != "SamuraiRunLeft") {
-            m_player->getComponent<CState>().state = "SamuraiRunLeft";
-            m_player->addComponent<CAnimation>(Assets::getInstance().getAnimation("SamuraiRun"));
+        if (m_player->getComponent<CState>().state != "PlyerRunLeft") {
+            m_player->getComponent<CState>().state = "PlayerRunLeft";
+            m_player->addComponent<CAnimation>(Assets::getInstance().getAnimation("PlayerRun"));
 
             auto trans = m_player->getComponent<CTransform>().scale;
             m_player->getComponent<CTransform>().scale.x = -std::abs(trans.x);
@@ -157,9 +173,9 @@ void Scene_BulletNinja::playerMovement() {
     }
 
     if (dir & CInput::RIGHT) {
-        if (m_player->getComponent<CState>().state != "SamuraiRunRight") {
-            m_player->getComponent<CState>().state = "SamuraiRunRight";
-            m_player->addComponent<CAnimation>(Assets::getInstance().getAnimation("SamuraiRun"));
+        if (m_player->getComponent<CState>().state != "PlayerRunRight") {
+            m_player->getComponent<CState>().state = "PlayerRunRight";
+            m_player->addComponent<CAnimation>(Assets::getInstance().getAnimation("PlayerRun"));
 
             auto trans = m_player->getComponent<CTransform>().scale;
             m_player->getComponent<CTransform>().scale.x = std::abs(trans.x);
@@ -175,6 +191,81 @@ void Scene_BulletNinja::playerMovement() {
 
     updateCamera();
 }
+
+void Scene_BulletNinja::enemyMovement() {
+    for (auto& enemy : _entityManager.getEntities("enemy")) {
+        
+
+        auto& enemyTransform = enemy->getComponent<CTransform>();
+        sf::Vector2f enemyPos = enemyTransform.pos;
+       // std::cout << "enemy scale: " << enemyTransform.scale << "\n";
+       // std::cout << "enemy pos: x: " << enemyTransform.pos.x << " ,y: " << enemyTransform.pos.x << "\n";
+        //enemyTransform.scale = sf::Vector2f{ 4.f, 4.f }; // this is the get around but there is more side effects
+
+        // Ensure player exists bfr accessing its components
+        if (!m_player || !m_player->hasComponent<CTransform>()) {
+            continue;
+        }
+
+        auto& playerTransform = m_player->getComponent<CTransform>();
+        sf::Vector2f playerPos = playerTransform.pos;
+
+        //std::cout << "Player pos: " << playerPos.x << "\n";
+        //std::cout << "enemy pos: " << enemyPos.x << "\n";
+        // Compute distance from player
+        float distance = std::hypot(playerPos.x - enemyPos.x, playerPos.y - enemyPos.y);
+
+        
+
+        auto& velocity = enemy->getComponent<CTransform>().vel;
+
+        // Increase speed Gradually / prevents sudden jumps
+        float maxSpeed = m_config.enemySpeed;
+        float acceleration = 0.0005f; // Adjust for smoother movement
+        velocity.x = std::min(velocity.x + acceleration, maxSpeed);
+        //velocity.y = std::min(velocity.y + acceleration, maxSpeed);
+
+        // If within attack range
+        if (distance <= 100.f) {
+            if (enemy->getComponent<CState>().state != "SamuraiAttackSword") {
+                enemy->getComponent<CState>().state = "SamuraiAttackSword";
+                enemy->addComponent<CAnimation>(Assets::getInstance().getAnimation("SamuraiAttackSword"));
+                //SoundPlayer::getInstance().play("enemy_attack", enemyPos);
+            }
+            continue;
+        }
+
+        
+
+        // Update animation state
+        
+        if (enemyPos.x < playerPos.x) {
+            if (enemy->getComponent<CState>().state != "SamuraiRunRight") {
+                enemy->getComponent<CState>().state = "SamuraiRunRight";
+                enemy->addComponent<CAnimation>(Assets::getInstance().getAnimation("SamuraiRun"));
+            }
+            
+            enemyTransform.scale.x = std::abs(enemyTransform.scale.x);
+        }else if (enemyPos.x > playerPos.x) {
+            if (enemy->getComponent<CState>().state != "SamuraiRunLeft") {
+                enemy->getComponent<CState>().state = "SamuraiRunLeft";
+                enemy->addComponent<CAnimation>(Assets::getInstance().getAnimation("SamuraiRun"));
+            }
+            enemyTransform.scale.x = -std::abs(enemyTransform.scale.x);
+        }
+
+        // Move toward player
+        sf::Vector2f direction = { playerPos.x - enemyPos.x, playerPos.y - enemyPos.y };
+        float length = std::hypot(direction.x, direction.y); // from https://en.cppreference.com/w/cpp/numeric/math/hypot to calculate the distnce
+        if (length > 0) {
+            direction /= length;
+            //std::cout << "Normalize: " << direction.x << " velocity: " << velocity.x << "\n";
+            enemyTransform.pos += direction * velocity.x;
+        }
+    }
+}
+
+
 void Scene_BulletNinja::updateCamera() {
     auto& playerPos = m_player->getComponent<CTransform>().pos;
     sf::Vector2f viewSize = m_worldView.getSize();
@@ -201,6 +292,7 @@ void Scene_BulletNinja::updateCamera() {
 
 void Scene_BulletNinja::sMovement(sf::Time dt) {
     playerMovement();
+    enemyMovement();
     playerAttacks();
 
     // move all objects
@@ -299,8 +391,8 @@ void Scene_BulletNinja::loadLevel(const std::string& path) {
             config >> m_worldBounds.width >> m_worldBounds.height;
             
         }
-        else if (token == "cameraReactionSpeed") {
-            config >> m_config.cameraReactionSpeed;
+        else if (token == "Speeds") {
+            config >> m_config.cameraReactionSpeed  >> m_config.playerSpeed >> m_config.enemySpeed;
         }
         else if (token[0] == '#') {
             std::cout << token;
@@ -365,7 +457,7 @@ void Scene_BulletNinja::sDoAction(const Command& action)
         // If no movement keys are pressed, set state to "idle"
         if (input.dir == 0) {
             m_player->getComponent<CState>().state = "idle";
-            m_player->addComponent<CAnimation>(Assets::getInstance().getAnimation("SamuraiIdle"));
+            m_player->addComponent<CAnimation>(Assets::getInstance().getAnimation("PlayerIdle"));
             m_player->getComponent<CInput>().dir = 0;
         }
 
@@ -451,12 +543,12 @@ void Scene_BulletNinja::drawAABB(std::shared_ptr<Entity> e) {
             position = sf::Vector2f{ position.x - (box.size.x / 2.f) - 3.f, position.y - (box.size.y/2.f) };
         }
 
-        if (cmp == "player" && e->getComponent<CState>().state == "SamuraiAttackSword") {
+        if (cmp == "player" && e->getComponent<CState>().state == "PlayerAttackSword") {
             size = sf::Vector2f{ box.size.x * 6.4f, box.size.y * transform.scale.y / 1.3f };
             position = sf::Vector2f{ (position.x * 2.f) - (box.size.x) + 50.f, position.y - (box.size.y / 2) };
         }
 
-        if (cmp == "player" && e->getComponent<CState>().state == "SamuraiAttackSpear") {
+        if (cmp == "player" && e->getComponent<CState>().state == "PlayerAttackSpear") {
             size = sf::Vector2f{ box.size.x * 6.4f, box.size.y * transform.scale.y / 1.3f };
             position = sf::Vector2f{  (position.x * 2.f) - (box.size.x ) + 50.f, position.y - (box.size.y/2) };
         }
@@ -548,7 +640,7 @@ void Scene_BulletNinja::sUpdate(sf::Time dt) {
 
     sAnimation(dt);
     sMovement(dt);
-    sCollisions();
+    //sCollisions();
 
     updateScore();
 }

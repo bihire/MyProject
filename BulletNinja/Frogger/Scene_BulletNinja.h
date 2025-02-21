@@ -14,7 +14,9 @@
 
 struct LevelConfig {
     float       cameraReactionSpeed{ 100.f };
-
+    float       playerSpeed{ 100.f };
+    float       enemySpeed{ 100.f };
+    
 };
 
 class Scene_BulletNinja : public Scene {
@@ -46,12 +48,14 @@ private:
 
     // helper functions
     void            playerMovement();
+    void            enemyMovement();
     void            playerAttacks();
     void            adjustPlayerPosition();
     void            checkPlayerState();
     void	        registerActions();
     void            spawnPlayer(sf::Vector2f pos);
     void            spawnBox(sf::Vector2f pos);
+    void            spawnEnemy(sf::Vector2f pos);
     void            updateCamera();
 
  

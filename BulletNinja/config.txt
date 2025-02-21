@@ -13,11 +13,19 @@ Music missionTheme      ../assets/Music/tweener.ogg
 Texture Background      ../assets/Textures/background.png
 Texture Title           ../assets/Textures/FroggerTitle.png
 Texture Entities        ../assets/Textures/FroggerAtlas.png
+
 Texture SamuraiDeath        ../assets/Textures/SamuraiDeath.png
 Texture SamuraiIdle        ../assets/Textures/SamuraiIdle.png
 Texture SamuraiRun        ../assets/Textures/SamuraiRun.png
 Texture SamuraiAttackSpear        ../assets/Textures/SamuraiAttackSpear.png
 Texture SamuraiAttackSword        ../assets/Textures/SamuraiAttackSword.png
+
+Texture playerDeath        ../assets/Textures/playerDeath.png
+Texture playerIdle        ../assets/Textures/playerIdle.png
+Texture playerRun        ../assets/Textures/playerRun.png
+Texture playerAttackSpear        ../assets/Textures/playerAttackSpear.png
+Texture playerAttackSword        ../assets/Textures/playerAttackSword.png
+
 Texture box        ../assets/Textures/box_cropped.png
 
 # Sprites
@@ -30,11 +38,18 @@ Sound death             ../assets/Sound/froggerDie.wav
 Sound hop               ../assets/Sound/froggerMove.wav
 
 JSON                    ../assets/Textures/FroggerAtlas.json
+
 JSON                    ../assets/Textures/SamuraiIdle.json
 JSON                    ../assets/Textures/SamuraiDeath.json
 JSON                    ../assets/Textures/SamuraiRun.json
 JSON                    ../assets/Textures/SamuraiAttackSpear.json
 JSON                    ../assets/Textures/SamuraiAttackSword.json
+
+JSON                    ../assets/Textures/playerIdle.json
+JSON                    ../assets/Textures/playerDeath.json
+JSON                    ../assets/Textures/playerRun.json
+JSON                    ../assets/Textures/playerAttackSpear.json
+JSON                    ../assets/Textures/playerAttackSword.json
 
 
 #
@@ -68,3 +83,7 @@ Animation       SamuraiRun     		SamuraiRun    		7     yes
 Animation       SamuraiAttackSpear     	SamuraiAttackSpear    	27     yes
 Animation       SamuraiAttackSword     	SamuraiAttackSword    	27     yes
 
+Animation       PlayerIdle     		playerIdle    		7     yes
+Animation       PlayerRun     		playerRun    		18     yes
+Animation       PlayerAttackSpear     	playerAttackSpear    	27     yes
+Animation       PlayerAttackSword     	playerAttackSword    	27     yes
