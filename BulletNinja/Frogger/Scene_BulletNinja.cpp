@@ -52,7 +52,7 @@ Scene_BulletNinja::Scene_BulletNinja(GameEngine* gameEngine, const std::string& 
     spawnBox(boxPos);
 
 
-    spawnEnemy(ePos);
+    //spawnEnemy(ePos);
 
     m_timer = sf::seconds(60.0f);
     m_maxHeight = spawnPos.y;
@@ -114,8 +114,8 @@ void Scene_BulletNinja::playerAttacks() {
     
 
     if (attack & CInput::SWORD) {
-        if (m_player->getComponent<CState>().state != "PlayerAttackSword") {
-            m_player->getComponent<CState>().state = "PlayerAttackSword";
+        if (m_player->getComponent<CState>().state != "attack_sword") {
+            m_player->getComponent<CState>().state = "attack_sword";
             m_player->addComponent<CAnimation>(Assets::getInstance().getAnimation("PlayerAttackSword"));
 
             /*auto trans = m_player->getComponent<CTransform>().scale;
@@ -125,8 +125,8 @@ void Scene_BulletNinja::playerAttacks() {
     }
 
     if (attack & CInput::SPEAR) {
-        if (m_player->getComponent<CState>().state != "PlayerAttackSpear") {
-            m_player->getComponent<CState>().state = "PlayerAttackSpear";
+        if (m_player->getComponent<CState>().state != "attack_spear") {
+            m_player->getComponent<CState>().state = "attack_spear";
             m_player->addComponent<CAnimation>(Assets::getInstance().getAnimation("PlayerAttackSpear"));
 
             //auto trans = m_player->getComponent<CTransform>().scale;
@@ -162,8 +162,8 @@ void Scene_BulletNinja::playerMovement() {
     }
 
     if (dir & CInput::LEFT) {
-        if (m_player->getComponent<CState>().state != "PlyerRunLeft") {
-            m_player->getComponent<CState>().state = "PlayerRunLeft";
+        if (m_player->getComponent<CState>().state != "run_left") {
+            m_player->getComponent<CState>().state = "run_left";
             m_player->addComponent<CAnimation>(Assets::getInstance().getAnimation("PlayerRun"));
 
             auto trans = m_player->getComponent<CTransform>().scale;
@@ -173,8 +173,8 @@ void Scene_BulletNinja::playerMovement() {
     }
 
     if (dir & CInput::RIGHT) {
-        if (m_player->getComponent<CState>().state != "PlayerRunRight") {
-            m_player->getComponent<CState>().state = "PlayerRunRight";
+        if (m_player->getComponent<CState>().state != "run_right") {
+            m_player->getComponent<CState>().state = "run_right";
             m_player->addComponent<CAnimation>(Assets::getInstance().getAnimation("PlayerRun"));
 
             auto trans = m_player->getComponent<CTransform>().scale;
@@ -227,8 +227,8 @@ void Scene_BulletNinja::enemyMovement() {
 
         // If within attack range
         if (distance <= 100.f) {
-            if (enemy->getComponent<CState>().state != "SamuraiAttackSword") {
-                enemy->getComponent<CState>().state = "SamuraiAttackSword";
+            if (enemy->getComponent<CState>().state != "attack_sword") {
+                enemy->getComponent<CState>().state = "attack_sword";
                 enemy->addComponent<CAnimation>(Assets::getInstance().getAnimation("SamuraiAttackSword"));
                 //SoundPlayer::getInstance().play("enemy_attack", enemyPos);
             }
@@ -240,15 +240,15 @@ void Scene_BulletNinja::enemyMovement() {
         // Update animation state
         
         if (enemyPos.x < playerPos.x) {
-            if (enemy->getComponent<CState>().state != "SamuraiRunRight") {
-                enemy->getComponent<CState>().state = "SamuraiRunRight";
+            if (enemy->getComponent<CState>().state != "run_right") {
+                enemy->getComponent<CState>().state = "run_right";
                 enemy->addComponent<CAnimation>(Assets::getInstance().getAnimation("SamuraiRun"));
             }
             
             enemyTransform.scale.x = std::abs(enemyTransform.scale.x);
         }else if (enemyPos.x > playerPos.x) {
-            if (enemy->getComponent<CState>().state != "SamuraiRunLeft") {
-                enemy->getComponent<CState>().state = "SamuraiRunLeft";
+            if (enemy->getComponent<CState>().state != "run_left") {
+                enemy->getComponent<CState>().state = "run_left";
                 enemy->addComponent<CAnimation>(Assets::getInstance().getAnimation("SamuraiRun"));
             }
             enemyTransform.scale.x = -std::abs(enemyTransform.scale.x);
@@ -259,7 +259,7 @@ void Scene_BulletNinja::enemyMovement() {
         float length = std::hypot(direction.x, direction.y); // from https://en.cppreference.com/w/cpp/numeric/math/hypot to calculate the distnce
         if (length > 0) {
             direction /= length;
-            //std::cout << "Normalize: " << direction.x << " velocity: " << velocity.x << "\n";
+            
             enemyTransform.pos += direction * velocity.x;
         }
     }
@@ -516,15 +516,7 @@ void Scene_BulletNinja::updateScore()
 
 void Scene_BulletNinja::drawAABB(std::shared_ptr<Entity> e) {
     if (m_drawAABB) {
-        /*auto box = e->getComponent<CBoundingBox>();
-        sf::RectangleShape rect;
-        rect.setSize(sf::Vector2f{ box.size.x * 2, box.size.y * 2 });
-        centerOrigin(rect);
-        rect.setPosition(e->getComponent<CTransform>().pos);
-        rect.setFillColor(sf::Color(0, 0, 0, 0));
-        rect.setOutlineColor(sf::Color{ 0, 255, 0 });
-        rect.setOutlineThickness(2.f);
-        _game->window().draw(rect);*/
+        
         auto box = e->getComponent<CBoundingBox>();
         auto transform = e->getComponent<CTransform>();
 
@@ -538,19 +530,43 @@ void Scene_BulletNinja::drawAABB(std::shared_ptr<Entity> e) {
             size = sf::Vector2f{ box.size.x * 2, box.size.y * 2 };
         }
 
-        if (cmp == "player" && e->getComponent<CState>().state == "idle") {
+        if ((cmp == "player" || cmp == "enemy") && e->getComponent<CState>().state == "idle") {
             size = sf::Vector2f{ box.size.x - 1.f, box.size.y * transform.scale.y / 2.f };
-            position = sf::Vector2f{ position.x - (box.size.x / 2.f) - 3.f, position.y - (box.size.y/2.f) };
+            position = sf::Vector2f{ position.x - (box.size.x / 2.f) - 3.f , position.y - (box.size.y/2.f) };
+            if (transform.scale.x != std::abs(transform.scale.x)) {
+                position.x = position.x + 60.f;
+            }
+
         }
 
-        if (cmp == "player" && e->getComponent<CState>().state == "PlayerAttackSword") {
-            size = sf::Vector2f{ box.size.x * 6.4f, box.size.y * transform.scale.y / 1.3f };
-            position = sf::Vector2f{ (position.x * 2.f) - (box.size.x) + 50.f, position.y - (box.size.y / 2) };
+        if ((cmp == "player" || cmp == "enemy") && e->getComponent<CState>().state == "run_left") {
+            size = sf::Vector2f{ box.size.x - 1.f, box.size.y * transform.scale.y / 2.f };
+            position = sf::Vector2f{ position.x - (box.size.x / 2.f) + 100.f, position.y - (box.size.y / 2.f) };
+            
+                position.x = position.x - 45.f;
+            
         }
 
-        if (cmp == "player" && e->getComponent<CState>().state == "PlayerAttackSpear") {
+        if ((cmp == "player" || cmp == "enemy") && e->getComponent<CState>().state == "run_right") {
+            size = sf::Vector2f{ box.size.x - 1.f, box.size.y * transform.scale.y / 2.f };
+            position = sf::Vector2f{ position.x - (box.size.x / 2.f) - 3.f, position.y - (box.size.y / 2.f) };
+            
+        }
+
+        if ((cmp == "player" || cmp == "enemy") && e->getComponent<CState>().state == "attack_sword") {
+            size = sf::Vector2f{ box.size.x * 5.2f, box.size.y * transform.scale.y / 1.3f };
+            position = sf::Vector2f{ (position.x * 2.f) - (box.size.x) - 40.f, position.y - (box.size.y / 2) };
+            if (transform.scale.x != std::abs(transform.scale.x)) {
+                position.x = position.x + 25.f;
+            }
+        }
+
+        if ((cmp == "player" || cmp == "enemy") && e->getComponent<CState>().state == "attack_spear") {
             size = sf::Vector2f{ box.size.x * 6.4f, box.size.y * transform.scale.y / 1.3f };
             position = sf::Vector2f{  (position.x * 2.f) - (box.size.x ) + 50.f, position.y - (box.size.y/2) };
+            if (transform.scale.x != std::abs(transform.scale.x)) {
+                position.x = position.x - 30.f;
+            }
         }
         
 
