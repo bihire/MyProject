@@ -1,0 +1,21 @@
+{
+    "frames": [
+      {
+        "filename": "box (0).png",
+        "frame": { "x": 0, "y": 0, "w": 162, "h": 162 },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": { "x": 0, "y": 0, "w": 162, "h": 162 },
+        "sourceSize": { "w": 162, "h": 162 }
+      }
+    ],
+    "meta": {
+      "app": "https://www.codeandweb.com/texturepacker",
+      "version": "1.0",
+      "image": "box_cropped.png",
+      "format": "RGBA8888",
+      "size": { "w": 162, "h": 162 },
+      "scale": "1"
+    }
+  }
+  

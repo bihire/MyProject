@@ -167,44 +167,56 @@ void Assets::loadJson(const std::string& path) {
 
 }
 
+const Assets::AnimationData& Assets::getAnimationData(const std::string& name) const {
+    static const AnimationData defaultData = { "", 0, false, {0, 0}, {0, 0} };
+    auto it = m_animationDataMap.find(name);
+    return (it != m_animationDataMap.end()) ? it->second : defaultData;
+}
+
 void Assets::loadAnimations(const std::string& path) {
-    // Read Config file
     std::ifstream confFile(path);
-    if (confFile.fail())
-    {
-        std::cerr << "Open file: " << path << " failed\n";
-        confFile.close();
+    if (confFile.fail()) {
+        std::cerr << "Failed to open file: " << path << "\n";
         exit(1);
     }
 
-    std::string token{ "" };
-    confFile >> token;
-    while (confFile)
-    {
-        if (token == "Animation")
-        {
+    std::string token;
+    while (confFile >> token) {
+        if (token == "Animation") {
             std::string name, texture, repeat;
             float speed;
-            confFile >> name >> texture >> speed >> repeat;
+            int hitboxStart, hitboxEnd, attackboxStart, attackboxEnd;
 
-            Animation a(name,
-                getTexture(texture),
-                m_frameSets[name],
-                sf::seconds(1 / speed),
-                (repeat == "yes"));
+            confFile >> name >> texture >> speed >> repeat >> hitboxStart >> hitboxEnd >> attackboxStart >> attackboxEnd;
+
+            Animation a(name, getTexture(texture), m_frameSets[name], sf::seconds(1 / speed), (repeat == "yes"));
+
+            // Store hitbox and attackbox in Animation itself
+            a.setHitboxFrames(hitboxStart, hitboxEnd);
+            a.setAttackboxFrames(attackboxStart, attackboxEnd);
 
             m_animationMap[name] = a;
+
+            // Store animation metadata separately
+            AnimationData animData;
+            animData.textureName = texture;
+            animData.speed = speed;
+            animData.repeats = (repeat == "yes");
+            animData.hitboxRange = { hitboxStart, hitboxEnd };
+            animData.attackboxRange = { attackboxStart, attackboxEnd };
+
+            m_animationDataMap[name] = animData;
         }
-        else
-        {
-            // ignore rest of line and continue
+        else {
             std::string buffer;
             std::getline(confFile, buffer);
         }
-        confFile >> token;
     }
+
     confFile.close();
 }
+
+
 
 
 void Assets::loadFonts(const std::string& path) {

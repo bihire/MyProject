@@ -12,6 +12,12 @@
 #include "Scene.h"
 #include "GameEngine.h"
 
+enum BBType
+{
+    Hitbox,
+    Attackbox
+};
+
 struct LevelConfig {
     float       cameraReactionSpeed{ 100.f };
     float       playerSpeed{ 100.f };
@@ -57,6 +63,7 @@ private:
     void            spawnBox(sf::Vector2f pos);
     void            spawnEnemy(sf::Vector2f pos);
     void            updateCamera();
+    //void            updateEntity(Entity& entity, sf::Time dt);
 
  
 
@@ -69,6 +76,10 @@ private:
     void            loadLevel(const std::string& path);
     sf::FloatRect   getViewBounds();
 
+    sf::FloatRect   calculateBoundingBox(std::shared_ptr<Entity> e, BBType t);
+    void            drawHitbox(std::shared_ptr<Entity> e);
+    void            drawAttackBox(std::shared_ptr<Entity> e);
+
 public:
 
     Scene_BulletNinja(GameEngine* gameEngine, const std::string& levelPath);
@@ -77,7 +88,7 @@ public:
     void		  sDoAction(const Command& command) override;
     void		  sRender() override;
 
-    void          drawAABB(std::shared_ptr<Entity> e);
+    //void          drawAABB(std::shared_ptr<Entity> e);
 
 };
 

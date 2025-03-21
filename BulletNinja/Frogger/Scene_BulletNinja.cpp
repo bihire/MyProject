@@ -52,7 +52,7 @@ Scene_BulletNinja::Scene_BulletNinja(GameEngine* gameEngine, const std::string& 
     spawnBox(boxPos);
 
 
-    //spawnEnemy(ePos);
+    spawnEnemy(ePos);
 
     m_timer = sf::seconds(60.0f);
     m_maxHeight = spawnPos.y;
@@ -76,6 +76,8 @@ void Scene_BulletNinja::spawnPlayer(sf::Vector2f pos) {
     m_player->addComponent<CBoundingBox>(sf::Vector2f(52.f, 52.f));
     m_player->addComponent<CInput>();
     m_player->addComponent<CAnimation>(Assets::getInstance().getAnimation("PlayerIdle"));
+
+    
 }
 
 void Scene_BulletNinja::spawnEnemy(sf::Vector2f pos) {
@@ -96,9 +98,8 @@ void Scene_BulletNinja::spawnBox(sf::Vector2f pos) {
     auto m_box = _entityManager.addEntity("box");
     const sf::Texture& texture = Assets::getInstance().getTexture("box");
     m_box->addComponent<CTransform>(pos).scale = sf::Vector2f(.5f, .5f);
-    //m_player->addComponent<CState>().state = "idle";
+    m_box->addComponent<CState>().state = "box";
     m_box->addComponent<CBoundingBox>(sf::Vector2f(40.f, 40.f));
-    m_box->addComponent<CInput>();
     m_box->addComponent<CSprite>(texture).sprite;
 }
 
@@ -117,6 +118,7 @@ void Scene_BulletNinja::playerAttacks() {
         if (m_player->getComponent<CState>().state != "attack_sword") {
             m_player->getComponent<CState>().state = "attack_sword";
             m_player->addComponent<CAnimation>(Assets::getInstance().getAnimation("PlayerAttackSword"));
+            
 
             /*auto trans = m_player->getComponent<CTransform>().scale;
             m_player->getComponent<CTransform>().scale.x = -std::abs(trans.x);*/
@@ -129,6 +131,8 @@ void Scene_BulletNinja::playerAttacks() {
             m_player->getComponent<CState>().state = "attack_spear";
             m_player->addComponent<CAnimation>(Assets::getInstance().getAnimation("PlayerAttackSpear"));
 
+            
+
             //auto trans = m_player->getComponent<CTransform>().scale;
             //m_player->getComponent<CTransform>().scale.x = std::abs(trans.x);
         }
@@ -139,6 +143,9 @@ void Scene_BulletNinja::playerAttacks() {
     if (attack != 0) {
         SoundPlayer::getInstance().play("hop", m_player->getComponent<CTransform>().pos);
         attack = 0;
+        auto& animation = m_player->getComponent<CAnimation>().animation;
+
+        
     }
 
     updateCamera();
@@ -213,7 +220,8 @@ void Scene_BulletNinja::enemyMovement() {
         //std::cout << "Player pos: " << playerPos.x << "\n";
         //std::cout << "enemy pos: " << enemyPos.x << "\n";
         // Compute distance from player
-        float distance = std::hypot(playerPos.x - enemyPos.x, playerPos.y - enemyPos.y);
+        //float distance = std::hypot(playerPos.x - enemyPos.x, playerPos.y - enemyPos.y);
+        float distance = std::abs(playerPos.x - enemyPos.x);
 
         
 
@@ -221,7 +229,7 @@ void Scene_BulletNinja::enemyMovement() {
 
         // Increase speed Gradually / prevents sudden jumps
         float maxSpeed = m_config.enemySpeed;
-        float acceleration = 0.0005f; // Adjust for smoother movement
+        float acceleration = 0.0001f; // Adjust for smoother movement
         velocity.x = std::min(velocity.x + acceleration, maxSpeed);
         //velocity.y = std::min(velocity.y + acceleration, maxSpeed);
 
@@ -260,7 +268,9 @@ void Scene_BulletNinja::enemyMovement() {
         if (length > 0) {
             direction /= length;
             
-            enemyTransform.pos += direction * velocity.x;
+            enemyTransform.pos.x = enemyTransform.pos.x + (direction.x * velocity.x);
+            enemyTransform.pos.y = playerPos.y;
+
         }
     }
 }
@@ -317,30 +327,35 @@ sf::FloatRect Scene_BulletNinja::getViewBounds() {
 }
 
 void Scene_BulletNinja::sCollisions() {
-    adjustPlayerPosition();
+    auto entities = _entityManager.getEntities();
 
-    for (auto& e : _entityManager.getEntities())
-    {
-        const float offset = 20.0f;
+    for (auto& attacker : entities) {
+        auto& attackerAnim = attacker->getComponent<CAnimation>().animation;
+        auto& attackerState = attacker->getComponent<CState>().state;
 
-        auto& bounds = m_worldView.getSize();
+        // Check if the attacker is in an attack state and within attack frames
+        if ((attackerState == "attack_sword" || attackerState == "attack_spear") && attackerAnim.hasAttackbox()) {
+            sf::FloatRect attackBox = calculateBoundingBox(attacker, Attackbox);
 
-        auto& transform = e->getComponent<CTransform>();
-        auto& half = e->getComponent<CBoundingBox>().halfSize;
+            for (auto& target : entities) {
+                //enmy should not destroy world object
+                // skip if attcker is target
+                if (attacker == target || (attacker->getTag() == "enemy" && target->getTag() == "box")) continue;
 
-        auto& position = transform.pos;
-        auto& velocity = transform.vel;
+                auto& targetAnim = target->getComponent<CAnimation>().animation;
 
-        if (velocity.x < 0 && position.x + half.x + offset < 0)
-            position.x = bounds.x + half.x + offset;
+                
+                if (targetAnim.hasHitbox() || target->getTag() == "box") {
+                    sf::FloatRect hitbox = calculateBoundingBox(target, Hitbox);
 
-        if (velocity.x > 0 && position.x - half.x - offset > bounds.x)
-            position.x = -half.x - offset;
+                    if (attackBox.intersects(hitbox)) {
+                        target->destroy();
+                        std::cout << attacker->getTag() << " hit " << target->getTag() << "!\n";
+                    }
+                }
+            }
+        }
     }
-
-    auto& playerPosition = m_player->getComponent<CTransform>().pos;
-
-    
 }
 
 void Scene_BulletNinja::registerActions() {
@@ -514,74 +529,187 @@ void Scene_BulletNinja::updateScore()
     }
 }
 
-void Scene_BulletNinja::drawAABB(std::shared_ptr<Entity> e) {
-    if (m_drawAABB) {
-        
-        auto box = e->getComponent<CBoundingBox>();
-        auto transform = e->getComponent<CTransform>();
+//void Scene_BulletNinja::drawAABB(std::shared_ptr<Entity> e) {
+//    if (m_drawAABB) {
+//        
+//        auto box = e->getComponent<CBoundingBox>();
+//        auto transform = e->getComponent<CTransform>();
+//        auto& animation = e->getComponent<CAnimation>().animation;
+//        size_t& currentFrame = animation._currentFrame;
+//
+//        sf::RectangleShape rect;
+//
+//        auto& size = box.size;
+//        auto position = e->getComponent<CTransform>().pos;
+//
+//        auto& cmp = e->getTag();
+//        if (cmp == "box") {
+//            size = sf::Vector2f{ box.size.x * 2, box.size.y * 2 };
+//        }
+//
+//        if ((cmp == "player" || cmp == "enemy") && e->getComponent<CState>().state == "idle") {
+//            size = sf::Vector2f{ box.size.x - 1.f, box.size.y * transform.scale.y / 2.f };
+//            position = sf::Vector2f{ position.x - (box.size.x / 2.f) - 3.f , position.y - (box.size.y/2.f) };
+//            if (transform.scale.x != std::abs(transform.scale.x)) {
+//                position.x = position.x + 60.f;
+//            }
+//
+//        }
+//
+//        if ((cmp == "player" || cmp == "enemy") && e->getComponent<CState>().state == "run_left") {
+//            size = sf::Vector2f{ box.size.x - 1.f, box.size.y * transform.scale.y / 2.f };
+//            position = sf::Vector2f{ position.x - (box.size.x / 2.f) + 100.f, position.y - (box.size.y / 2.f) };
+//            
+//                position.x = position.x - 45.f;
+//            
+//        }
+//
+//        if ((cmp == "player" || cmp == "enemy") && e->getComponent<CState>().state == "run_right") {
+//            size = sf::Vector2f{ box.size.x - 1.f, box.size.y * transform.scale.y / 2.f };
+//            position = sf::Vector2f{ position.x - (box.size.x / 2.f) - 3.f, position.y - (box.size.y / 2.f) };
+//            
+//        }
+//
+//        if ((cmp == "player" || cmp == "enemy") && e->getComponent<CState>().state == "attack_sword") {
+//            size = sf::Vector2f{ box.size.x * 5.2f, box.size.y * transform.scale.y / 1.3f };
+//            position = sf::Vector2f{ (position.x * 2.f) - (box.size.x) - 40.f, position.y - (box.size.y / 2) };
+//            if (transform.scale.x != std::abs(transform.scale.x)) {
+//                position.x = position.x + 25.f;
+//            }
+//        }
+//
+//        if ((cmp == "player" || cmp == "enemy") && e->getComponent<CState>().state == "attack_spear") {
+//            size = sf::Vector2f{ box.size.x * 6.4f, box.size.y * transform.scale.y / 1.3f };
+//            position = sf::Vector2f{  (position.x * 2.f) - (box.size.x ) + 50.f, position.y - (box.size.y/2) };
+//            if (transform.scale.x != std::abs(transform.scale.x)) {
+//                position.x = position.x - 30.f;
+//            }
+//        }
+//        
+//
+//        
+//            
+//            rect.setSize(size);
+//            centerOrigin(rect);
+//
+//            rect.setPosition(position);
+//            rect.setFillColor(sf::Color(0, 0, 0, 0)); // Transparent fill
+//            rect.setOutlineColor(sf::Color{ 0, 255, 0 }); // Green outline
+//            rect.setOutlineThickness(2.f);
+//
+//            _game->window().draw(rect);
+//        
+//        
+//
+//    }
+//}
 
-        sf::RectangleShape rect;
+sf::FloatRect Scene_BulletNinja::calculateBoundingBox(std::shared_ptr<Entity> e, BBType type) {
+    auto box = e->getComponent<CBoundingBox>();
+    auto transform = e->getComponent<CTransform>();
+    auto& size = box.size;
+    auto position = transform.pos;
 
-        auto& size = box.size;
-        auto position = e->getComponent<CTransform>().pos;
+    auto& tag = e->getTag();
+    auto& state = e->getComponent<CState>().state;
 
-        auto& cmp = e->getTag();
-        if (cmp == "box") {
-            size = sf::Vector2f{ box.size.x * 2, box.size.y * 2 };
-        }
 
-        if ((cmp == "player" || cmp == "enemy") && e->getComponent<CState>().state == "idle") {
-            size = sf::Vector2f{ box.size.x - 1.f, box.size.y * transform.scale.y / 2.f };
-            position = sf::Vector2f{ position.x - (box.size.x / 2.f) - 3.f , position.y - (box.size.y/2.f) };
-            if (transform.scale.x != std::abs(transform.scale.x)) {
-                position.x = position.x + 60.f;
-            }
-
-        }
-
-        if ((cmp == "player" || cmp == "enemy") && e->getComponent<CState>().state == "run_left") {
-            size = sf::Vector2f{ box.size.x - 1.f, box.size.y * transform.scale.y / 2.f };
-            position = sf::Vector2f{ position.x - (box.size.x / 2.f) + 100.f, position.y - (box.size.y / 2.f) };
-            
-                position.x = position.x - 45.f;
-            
-        }
-
-        if ((cmp == "player" || cmp == "enemy") && e->getComponent<CState>().state == "run_right") {
-            size = sf::Vector2f{ box.size.x - 1.f, box.size.y * transform.scale.y / 2.f };
-            position = sf::Vector2f{ position.x - (box.size.x / 2.f) - 3.f, position.y - (box.size.y / 2.f) };
-            
-        }
-
-        if ((cmp == "player" || cmp == "enemy") && e->getComponent<CState>().state == "attack_sword") {
-            size = sf::Vector2f{ box.size.x * 5.2f, box.size.y * transform.scale.y / 1.3f };
-            position = sf::Vector2f{ (position.x * 2.f) - (box.size.x) - 40.f, position.y - (box.size.y / 2) };
-            if (transform.scale.x != std::abs(transform.scale.x)) {
-                position.x = position.x + 25.f;
-            }
-        }
-
-        if ((cmp == "player" || cmp == "enemy") && e->getComponent<CState>().state == "attack_spear") {
-            size = sf::Vector2f{ box.size.x * 6.4f, box.size.y * transform.scale.y / 1.3f };
-            position = sf::Vector2f{  (position.x * 2.f) - (box.size.x ) + 50.f, position.y - (box.size.y/2) };
-            if (transform.scale.x != std::abs(transform.scale.x)) {
-                position.x = position.x - 30.f;
-            }
-        }
-        
-
-        rect.setSize(size);
-        centerOrigin(rect);
-
-        rect.setPosition(position);
-        rect.setFillColor(sf::Color(0, 0, 0, 0));
-        rect.setOutlineColor(sf::Color{ 0, 255, 0 });
-        rect.setOutlineThickness(2.f);
-        _game->window().draw(rect);
-        
-
+    if (tag == "box") {
+        size = sf::Vector2f{ box.size.x * 2, box.size.y * 2 };
     }
+
+    if ((tag == "player" || tag == "enemy")) {
+        if (state == "idle") {
+            size = sf::Vector2f{ box.size.x - 1.f, box.size.y * transform.scale.y / 2.f };
+            position = sf::Vector2f{ position.x - (box.size.x / 2.f) - 3.f , position.y - (box.size.y / 2.f) };
+            if (transform.scale.x < 0) position.x += 60.f;
+
+        }
+        else if (state == "run_left") {
+            size = sf::Vector2f{ box.size.x - 1.f, box.size.y * transform.scale.y / 2.f };
+            position.x += 55.f;  
+            position.y -= (box.size.y / 2.f);
+        }
+        else if (state == "run_right") {
+            size = sf::Vector2f{ box.size.x - 1.f, box.size.y * transform.scale.y / 2.f };
+            position.x -= (box.size.x / 2.f) + 3.f;
+            position.y -= (box.size.y / 2.f);
+        }
+        else if (state == "attack_sword") {
+            if (type == Hitbox) {
+                size = sf::Vector2f{ box.size.x - 1.f, box.size.y * transform.scale.y / 2.f };
+                position = sf::Vector2f{ position.x - (box.size.x / 2.f) - 3.f , position.y - (box.size.y / 2.f) };
+                if (transform.scale.x < 0) position.x += 60.f;
+            }
+            if (type == Attackbox) {
+                size = sf::Vector2f{ box.size.x * 5.2f, box.size.y * transform.scale.y / 1.3f };
+                position.x = (position.x * 2.f) - (box.size.x) - 40.f;
+                position.y -= (box.size.y / 2.f);
+                if (transform.scale.x < 0) position.x += 25.f;
+            }
+            
+        }
+        else if (state == "attack_spear") {
+            if (type == Hitbox) {
+                size = sf::Vector2f{ box.size.x + 25.f, box.size.y * transform.scale.y / 2.f };
+                position = sf::Vector2f{ position.x - (box.size.x / 2.f) + 20.f , position.y - (box.size.y / 2.f) };
+                if (transform.scale.x < 0) position.x += 60.f;
+            }
+            if (type == Attackbox) {
+                size = sf::Vector2f{ box.size.x * 6.4f, box.size.y * transform.scale.y / 1.3f };
+                position.x = (position.x * 2.f) - (box.size.x) + 50.f;
+                position.y -= (box.size.y / 2.f);
+                if (transform.scale.x < 0) position.x -= 30.f;
+            }
+            
+        }
+    }
+
+    return sf::FloatRect(position, size);
 }
+
+void Scene_BulletNinja::drawHitbox(std::shared_ptr<Entity> e) {
+    if (!m_drawAABB) return;
+
+    auto& animation = e->getComponent<CAnimation>().animation;
+
+    
+    if (!animation.hasHitbox() && e->getComponent<CState>().state != "box") return;
+
+    sf::FloatRect boundingBox = calculateBoundingBox(e, Hitbox);
+    sf::RectangleShape rect;
+    rect.setSize(boundingBox.getSize());
+    centerOrigin(rect);
+    rect.setPosition(boundingBox.getPosition());
+
+    rect.setFillColor(sf::Color(0, 0, 0, 0)); // Transparent
+    rect.setOutlineColor(sf::Color::Green); // Green outline for hitbox
+    rect.setOutlineThickness(2.f);
+
+    _game->window().draw(rect);
+}
+
+void Scene_BulletNinja::drawAttackBox(std::shared_ptr<Entity> e) {
+    if (!m_drawAABB) return;
+
+    auto& animation = e->getComponent<CAnimation>().animation;
+    if (!animation.hasAttackbox()) return;
+
+    sf::FloatRect boundingBox = calculateBoundingBox(e, Attackbox);
+    sf::RectangleShape rect;
+    rect.setSize({ boundingBox.width + 5.f, boundingBox.height + 5.f });
+    centerOrigin(rect);
+    rect.setPosition(boundingBox.getPosition());
+
+    rect.setFillColor(sf::Color(0, 0, 0, 0)); // Transparent
+    rect.setOutlineColor(sf::Color::Blue); // Blue outline for attack box
+    rect.setOutlineThickness(4.f);
+
+    _game->window().draw(rect);
+}
+
+
+
 
 void Scene_BulletNinja::sRender()
 {
@@ -603,7 +731,9 @@ void Scene_BulletNinja::sRender()
             anim.setRotation(tfm.angle);
             anim.setScale(tfm.scale);
 
-            drawAABB(e);
+            //drawAABB(e);
+            drawHitbox(e);
+            drawAttackBox(e);
             
             _game->window().draw(anim);
         }
@@ -620,7 +750,9 @@ void Scene_BulletNinja::sRender()
         anim.getSprite().setScale(tfm.scale);
         _game->window().draw(anim.getSprite());
 
-        drawAABB(e);
+        //drawAABB(e);
+        drawHitbox(e);
+        drawAttackBox(e);
 
     }
 
@@ -656,7 +788,7 @@ void Scene_BulletNinja::sUpdate(sf::Time dt) {
 
     sAnimation(dt);
     sMovement(dt);
-    //sCollisions();
+    sCollisions();
 
     updateScore();
 }
@@ -665,6 +797,7 @@ void Scene_BulletNinja::sUpdate(sf::Time dt) {
 void Scene_BulletNinja::sAnimation(sf::Time dt) {
     auto list = _entityManager.getEntities();
     for (auto e : _entityManager.getEntities()) {
+        
         // update all animations
         if (e->hasComponent<CAnimation>()) {
             auto& animation = e->getComponent<CAnimation>().animation;
@@ -710,6 +843,27 @@ void Scene_BulletNinja::checkPlayerState()
         }
     }
 }
+
+//void Scene_BulletNinja::updateEntity(Entity& entity, sf::Time dt) {
+//    auto& anim = entity.getComponent<CAnimation>();
+//
+//    // Update animation 1st
+//    anim.animation.update(dt);
+//
+//    int currentFrame = anim.animation.getCurFrame();
+//    std::string animName = anim.animation.getName();
+//
+//    if (entity.hasComponent<CHitbox>()) {
+//        auto& hitbox = entity.getComponent<CHitbox>();
+//        hitbox.update(animName, currentFrame);
+//    }
+//
+//    if (entity.hasComponent<CAttackBox>()) {
+//        auto& attackBox = entity.getComponent<CAttackBox>();
+//        attackBox.update(animName, currentFrame);
+//    }
+//}
+
 
 
 

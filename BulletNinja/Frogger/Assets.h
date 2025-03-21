@@ -19,6 +19,14 @@ public:
         sf::IntRect textureRect;
     };
 
+    struct AnimationData {
+        std::string textureName;
+        int speed;
+        bool repeats;
+        std::pair<int, int> hitboxRange;
+        std::pair<int, int> attackboxRange;
+    };
+
 private:
     // singleton class
     Assets();
@@ -40,6 +48,7 @@ private:
     std::map<std::string, std::unique_ptr<sf::SoundBuffer>>     m_soundEffects;
     std::map<std::string, Animation>                            m_animationMap;
     std::map<std::string, std::vector<sf::IntRect>>             m_frameSets;
+    std::map<std::string, AnimationData>                        m_animationDataMap;
 
 
     void loadFonts(const std::string& path);
@@ -61,6 +70,8 @@ public:
     const sf::Texture& getTexture(const std::string& textureName) const;
     const Sprite& getSprt(const std::string& sprtName) const;
     const Animation& getAnimation(const std::string& name) const;
+
+    const AnimationData& getAnimationData(const std::string& name) const;
 
 };
 
