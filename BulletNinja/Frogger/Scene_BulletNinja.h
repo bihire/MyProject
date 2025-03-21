@@ -55,6 +55,8 @@ private:
     // helper functions
     void            playerMovement();
     void            enemyMovement();
+    void            adjustEntityMovement(std::shared_ptr<Entity> e);
+
     void            playerAttacks();
     void            adjustPlayerPosition();
     void            checkPlayerState();

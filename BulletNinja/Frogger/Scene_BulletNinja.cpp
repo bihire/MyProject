@@ -157,7 +157,8 @@ void Scene_BulletNinja::playerMovement() {
         return;
 
     auto& dir = m_player->getComponent<CInput>().dir;
-    auto& pos = m_player->getComponent<CTransform>().pos;
+    auto& transform = m_player->getComponent<CTransform>();
+    transform.prevPos = transform.pos;
     
     float speed = 5.f;
 
@@ -176,7 +177,7 @@ void Scene_BulletNinja::playerMovement() {
             auto trans = m_player->getComponent<CTransform>().scale;
             m_player->getComponent<CTransform>().scale.x = -std::abs(trans.x);
         }
-        pos.x -= speed;
+        transform.pos.x -= speed;
     }
 
     if (dir & CInput::RIGHT) {
@@ -187,7 +188,7 @@ void Scene_BulletNinja::playerMovement() {
             auto trans = m_player->getComponent<CTransform>().scale;
             m_player->getComponent<CTransform>().scale.x = std::abs(trans.x);
         }
-        pos.x += speed;
+        transform.pos.x += speed;
     }
         
 
@@ -205,11 +206,8 @@ void Scene_BulletNinja::enemyMovement() {
 
         auto& enemyTransform = enemy->getComponent<CTransform>();
         sf::Vector2f enemyPos = enemyTransform.pos;
-       // std::cout << "enemy scale: " << enemyTransform.scale << "\n";
-       // std::cout << "enemy pos: x: " << enemyTransform.pos.x << " ,y: " << enemyTransform.pos.x << "\n";
-        //enemyTransform.scale = sf::Vector2f{ 4.f, 4.f }; // this is the get around but there is more side effects
-
-        // Ensure player exists bfr accessing its components
+        enemyTransform.prevPos = enemyPos;
+       
         if (!m_player || !m_player->hasComponent<CTransform>()) {
             continue;
         }
@@ -217,10 +215,7 @@ void Scene_BulletNinja::enemyMovement() {
         auto& playerTransform = m_player->getComponent<CTransform>();
         sf::Vector2f playerPos = playerTransform.pos;
 
-        //std::cout << "Player pos: " << playerPos.x << "\n";
-        //std::cout << "enemy pos: " << enemyPos.x << "\n";
-        // Compute distance from player
-        //float distance = std::hypot(playerPos.x - enemyPos.x, playerPos.y - enemyPos.y);
+        
         float distance = std::abs(playerPos.x - enemyPos.x);
 
         
@@ -275,6 +270,35 @@ void Scene_BulletNinja::enemyMovement() {
     }
 }
 
+void Scene_BulletNinja::adjustEntityMovement(std::shared_ptr<Entity> entity) {
+    
+    sf::FloatRect entityBB = calculateBoundingBox(entity, Hitbox);
+    
+
+    // Loop thu all boxees
+    for (auto& wall : _entityManager.getEntities("box")) {
+        sf::FloatRect wallBB = calculateBoundingBox(wall, Hitbox);
+        
+        if (entityBB.intersects(wallBB)) {
+            
+            auto& transform = entity->getComponent<CTransform>();
+            auto& state = entity->getComponent<CState>().state;
+            auto& anim = entity->addComponent<CAnimation>();
+            
+            transform.pos = transform.prevPos;
+            state = "idle";
+            if (entity->getTag() == "player") anim.animation = Assets::getInstance().getAnimation("PlayerIdle");
+            if (entity->getTag() == "enemy") anim.animation = Assets::getInstance().getAnimation("SamuraiIdle");
+            
+            transform.vel.x = 0;
+
+            
+            return;
+        }
+    }
+}
+
+
 
 void Scene_BulletNinja::updateCamera() {
     auto& playerPos = m_player->getComponent<CTransform>().pos;
@@ -302,7 +326,13 @@ void Scene_BulletNinja::updateCamera() {
 
 void Scene_BulletNinja::sMovement(sf::Time dt) {
     playerMovement();
+    //adjustEntityMovement(m_player); // in case of box collision
+
     enemyMovement();
+    //for (auto& enemy : _entityManager.getEntities("enemy")) { 
+    //    adjustEntityMovement(enemy); // in case of box collision
+    //}
+
     playerAttacks();
 
     // move all objects
