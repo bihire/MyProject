@@ -27,9 +27,13 @@ void Animation::update(sf::Time dt) {
         if (_currentFrame >= _frames.size() && !_isRepeating) {
             _hasEnded = true;
             return;  // on the last frame of non-repeating animation, leave it
-        }
-        else {
+        } else {
+            
             _currentFrame = (_currentFrame % _frames.size());
+            if (onFrameChange) {
+                onFrameChange();  // Notify listener
+            }
+
         }
         _sprite.setTextureRect(_frames[_currentFrame]);
         centerOrigin(_sprite);

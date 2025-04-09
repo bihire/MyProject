@@ -12,6 +12,7 @@
 #include "Animation.h"
 #include <bitset>
 #include <unordered_map>
+#include <unordered_set>
 
 
 struct Component
@@ -59,90 +60,82 @@ struct CTransform : public Component
 
 };
 
-//struct CHitbox : public Component {
-//    std::unordered_map<std::string, std::unordered_map<int, sf::FloatRect>> hitboxes;
-//    sf::FloatRect currentHitbox;
-//
-//    CHitbox() = default;
-//
-//    // Set hitbox for a specific frame
-//    void setHitboxForFrame(const std::string& animationName, int frame, const sf::FloatRect& box) {
-//        hitboxes[animationName][frame] = box;
-//    }
-//
-//    // Set hitbox for a range of frames
-//    void setHitboxForFrame(const std::string& animationName, int startFrame, int endFrame, const sf::FloatRect& box) {
-//        for (int i = startFrame; i <= endFrame; ++i) {
-//            hitboxes[animationName][i] = box;
-//        }
-//    }
-//
-//    // Update the hitbox when the animation frame changes
-//    void update(const std::string& animationName, int currentFrame) {
-//        if (hitboxes.count(animationName) && hitboxes[animationName].count(currentFrame)) {
-//            currentHitbox = hitboxes[animationName][currentFrame];
-//        }
-//        else {
-//            currentHitbox = sf::FloatRect();
-//        }
-//    }
-//};
-//
-//
-//
-//struct CAttackBox : public Component {
-//    std::unordered_map<std::string, std::unordered_map<int, sf::FloatRect>> attackBoxes;
-//    sf::FloatRect currentAttackBox;
-//
-//    CAttackBox() = default;
-//
-//    void setAttackBoxForFrame(const std::string& animationName, int frame, const sf::FloatRect& box) {
-//        attackBoxes[animationName][frame] = box;
-//    }
-//
-//    void setAttackBoxForFrame(const std::string& animationName, int startFrame, int endFrame, const sf::FloatRect& box) {
-//        for (int i = startFrame; i <= endFrame; ++i) {
-//            attackBoxes[animationName][i] = box;
-//        }
-//    }
-//
-//    void update(const std::string& animationName, int currentFrame) {
-//        if (attackBoxes.count(animationName) && attackBoxes[animationName].count(currentFrame)) {
-//            currentAttackBox = attackBoxes[animationName][currentFrame];
-//        }
-//        else {
-//            currentAttackBox = sf::FloatRect();
-//        }
-//    }
-//};
+struct CJump : public Component {
+    bool isJumping = false;
+    float jumpTime = 0.f;
+    float maxJumpTime = 0.3f;
 
-//struct CAnimation : public Component {
-//    Animation animation;
-//    std::string currentAnimName;
-//    int lastFrame{ -1 };
-//
-//    CAnimation() = default;
-//    CAnimation(const Animation& a) : animation(a), currentAnimName(a.getName()) {}
-//
-//    void update(sf::Time dt, CHitbox& hitboxComponent, CAttackBox& attackBoxComponent) {
-//        animation.update(dt);
-//
-//        int currentFrame = animation.getCurFrame();
-//        if (currentFrame != lastFrame || currentAnimName != animation.getName()) {
-//            hitboxComponent.update(animation.getName(), currentFrame);
-//            attackBoxComponent.update(animation.getName(), currentFrame);
-//            lastFrame = currentFrame;
-//            currentAnimName = animation.getName();
-//        }
-//    }
-//};
+    CJump() = default;
+    CJump(float maxTime) : maxJumpTime(maxTime) {}
+};
+
+
+struct CScore : public Component {
+    int _score{ 0 };
+    int _lives{ 1 };
+    int _hp{ 100 };
+    int _DefautHp;
+
+    std::unordered_set<std::shared_ptr<std::atomic<uint64_t>>> hitTracker;         // To do: clean this on animation chang add listeners on Animation
+
+    CScore() = default;
+    CScore(int lives) : _lives(lives), _DefautHp(_hp) {};
+    CScore(int lives, int hp) : _lives(lives), _hp(hp), _DefautHp(hp) {};
+
+    bool canTakeHit(std::shared_ptr<std::atomic<uint64_t>> attackerAnimKey) {
+        return hitTracker.find(attackerAnimKey) == hitTracker.end();
+    }
+
+    void registerHit(std::shared_ptr<std::atomic<uint64_t>> attackerAnimKey) {
+        hitTracker.insert(attackerAnimKey);
+    }
+
+    void clearOldHits() {
+        hitTracker.clear();
+    }
+};
+
+struct CHitTracker : public Component {
+    uint64_t lastHitAnimationKey{ 0 };
+
+    CHitTracker() = default;
+};
 
 struct CAnimation : public Component {
     Animation animation;
+    std::shared_ptr<std::atomic<uint64_t>> key;
 
     CAnimation() = default;
-    CAnimation(const Animation& a) : animation(a) {}
+
+    CAnimation(const Animation& a)
+        : animation(a), key(std::make_shared<std::atomic<uint64_t>>(0)) {
+        bindKey();
+    }
+
+    void bindKey() {
+        animation.onFrameChange = [this]() {
+            // Increment the atomic key when the frame changes
+            key->fetch_add(1, std::memory_order_relaxed);
+            };
+
+
+    }
+
+    CAnimation(const CAnimation& other)
+        : animation(other.animation), key(other.key) {
+        bindKey();
+    }
+
+    CAnimation& operator=(const CAnimation& other) {
+        if (this != &other) {
+            animation = other.animation;
+            key = other.key;
+            bindKey();
+        }
+        return *this;
+    }
 };
+
 
 
 
@@ -155,6 +148,11 @@ struct CBoundingBox : public Component
     CBoundingBox() = default;
     CBoundingBox(const sf::Vector2f& s) : size(s), halfSize(0.5f * s)
     {}
+};
+
+struct CPhysics : public Component {
+    bool isJumping = false;
+    sf::Vector2f velocity = { 0.f, 0.f };
 };
 
 struct CState : public Component {

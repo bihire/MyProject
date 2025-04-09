@@ -20,7 +20,7 @@ public:
 	size_t				        _simulationSpeed{ 1 };
 	bool				        _running{ true };
 
-	void						loadConfigFromFile(const std::string &path, unsigned int &width, unsigned int &height) const;
+	void						loadConfigFromFile(const std::string &path, unsigned int &width, unsigned int &height, std::string& type) const;
 	void						init(const std::string& path);
 	void						sUserInput();
 	std::shared_ptr<Scene>		currentScene();

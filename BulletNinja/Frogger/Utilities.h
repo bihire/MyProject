@@ -57,6 +57,12 @@ inline void displayBounds(const T& t) {
     std::cout << "Global bounds: " << t.getGlobalBounds() << "\n";
 }
 
+inline void centerOrigin(sf::FloatRect& rect)
+{
+    rect.left -= rect.width / 2.f;
+    rect.top -= rect.height / 2.f;
+}
+
 
 
 

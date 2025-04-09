@@ -7,3 +7,8 @@ Speeds 				  75		  2		  1
 
 Bkg Background 0 0
 
+# spawn enemies
+Tree BloodTree_Glowing 200
+Tree BloodTree_Glowing 400
+Tree BloodTree_Glowing 700
+Tree BloodTree_Glowing 900

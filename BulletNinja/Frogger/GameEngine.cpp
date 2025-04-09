@@ -20,10 +20,15 @@ void GameEngine::init(const std::string& path)
 {
     unsigned int width;
     unsigned int height;
-    loadConfigFromFile(path, width, height);
+	std::string windowType;
+    loadConfigFromFile(path, width, height, windowType);
 
+	
+	if (windowType == "fullscreen") {
+		sf::VideoMode desktopMode = sf::VideoMode::getDesktopMode();
+		_window.create(desktopMode, "BULET NINJA", sf::Style::Fullscreen);
+	} else _window.create(sf::VideoMode(width, height), "GEX Bullet Ninja - Bihire Jules Boris");
 
-    _window.create(sf::VideoMode(width, height), "GEX Bullet Ninja - Bihire Jules Boris");
 
     _statisticsText.setFont(Assets::getInstance().getFont("main"));
     _statisticsText.setPosition(15.0f, 5.0f);
@@ -32,7 +37,7 @@ void GameEngine::init(const std::string& path)
 	changeScene("MENU", std::make_shared<Scene_Menu>(this));
 }
 
-void GameEngine::loadConfigFromFile(const std::string &path, unsigned int &width, unsigned int &height) const {
+void GameEngine::loadConfigFromFile(const std::string &path, unsigned int &width, unsigned int &height, std::string& type) const {
     std::ifstream config(path);
     if (config.fail()) {
         std::cerr << "Open file " << path << " failed\n";
@@ -43,7 +48,7 @@ void GameEngine::loadConfigFromFile(const std::string &path, unsigned int &width
     config >> token;
     while (!config.eof()) {
         if (token == "Window") {
-            config >> width >> height;
+            config >> width >> height >> type;
         } else if (token[0] == '#') {
             std::string tmp;
             std::getline(config, tmp);

@@ -1,6 +1,6 @@
 # GameEngine Config
 
-Window  600 600
+Window  600 600 partial
 
 Font    Arial           ../assets/fonts/arial.ttf
 Font    main            ../assets/fonts/Sansation.ttf
@@ -26,6 +26,8 @@ Texture playerRun        ../assets/Textures/playerRun.png
 Texture playerAttackSpear        ../assets/Textures/playerAttackSpear.png
 Texture playerAttackSword        ../assets/Textures/playerAttackSword.png
 
+Texture BloodTree        ../assets/Textures/BloodTree112x128.png
+
 Texture box        ../assets/Textures/box_cropped.png
 
 # Sprites
@@ -50,6 +52,8 @@ JSON                    ../assets/Textures/playerDeath.json
 JSON                    ../assets/Textures/playerRun.json
 JSON                    ../assets/Textures/playerAttackSpear.json
 JSON                    ../assets/Textures/playerAttackSword.json
+
+JSON                    ../assets/Textures/BloodTreeGlowing.json
 
 
 
@@ -90,3 +94,5 @@ Animation   PlayerAttackSpear       playerAttackSpear   27     yes      0       
 Animation   PlayerAttackSword       playerAttackSword   27     yes      0            22         5               10
 
 
+
+Animation   BloodTree_Glowing		    BloodTree		7      yes      0            0          0               0

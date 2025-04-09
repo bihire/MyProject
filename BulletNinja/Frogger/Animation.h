@@ -3,6 +3,7 @@
 
 #include <SFML/Graphics.hpp>
 #include <vector>
+#include <functional>
 
 class Animation {
 public:
@@ -16,6 +17,7 @@ public:
     sf::Sprite                  _sprite;
     std::vector<int>            _hitboxFrames;   // New: Hitbox frames
     std::vector<int>            _attackboxFrames; // New: Attackbox frames
+    std::function<void()>       onFrameChange; // Broadcast animation restats
 
 public:
     Animation() = default;
@@ -33,6 +35,7 @@ public:
     
     void                    setHitboxFrames(int start, int end);
     void                    setAttackboxFrames(int start, int end);
+
 
     
     const std::vector<int>& getHitboxFrames() const;

@@ -14,7 +14,7 @@ std::shared_ptr<Entity> EntityManager::addEntity(const std::string& tag) {
 
     // store it in entities vector
     m_EntitiesToAdd.push_back(e);
-    // return shared pointer to it
+    // return shared pointer to it  
     return e;
 }
 
