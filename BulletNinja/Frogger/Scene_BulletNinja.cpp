@@ -556,7 +556,7 @@ void Scene_BulletNinja::playerCheckState() {
 
 void Scene_BulletNinja::attackCollisions() {
     const std::unordered_map<std::string, std::vector<std::string>> validTargets = {
-        {"player", {"enemy", "box", "destructible"}},  // Player can attack these
+        {"player", {"enemy", "box", "zombie"}},  // Player can attack these
         {"enemy", {"player"}}                          // Enemies can only attack player
     };
 
@@ -881,60 +881,7 @@ void Scene_BulletNinja::update(sf::Time dt)
    sUpdate(dt);
 }
 
-//void Scene_BulletNinja::sDoAction(const Command& action)
-//{
-//    auto& input = m_player->getComponent<CInput>();
-//    //// On Key Press
-//    if (action.type() == "START") {
-//        if (action.name() == "PAUSE") { setPaused(!_isPaused); }
-//        else if (action.name() == "QUIT") { _game->quitLevel(); }
-//        else if (action.name() == "BACK") { _game->backLevel(); }
-//        else if (action.name() == "TOGGLE_TEXTURE") { m_drawTextures = !m_drawTextures; }
-//        else if (action.name() == "TOGGLE_COLLISION") { m_drawAABB = !m_drawAABB; }
-//        else if (action.name() == "TOGGLE_GRID") { m_drawGrid = !m_drawGrid; }
-//
-//
-//        //Set attacks
-//        if (action.name() == "ATTACKSWORD") { input.attack |= CInput::SWORD; }
-//        if (action.name() == "ATTACKSPEAR") { input.attack |= CInput::SPEAR; }
-//
-//        // Set movement state to "running"
-//        //m_player->getComponent<CState>().state = "running";
-//
-//        // Set direction using bitwise OR (|=) to allow multiple directions
-//        if (action.name() == "LEFT") { input.dir |= CInput::LEFT; }
-//        if (action.name() == "RIGHT") { input.dir |= CInput::RIGHT; }
-//        if (action.name() == "UP") { input.dir |= CInput::UP; }
-//        if (action.name() == "DOWN") { input.dir |= CInput::DOWN; }
-//
-//        
-//
-//
-//
-//    }
-//    
-//    
-//    
-//    else if (action.type() == "END") {
-//        if (action.name() == "LEFT") { input.dir &= ~CInput::LEFT; }
-//        if (action.name() == "RIGHT") { input.dir &= ~CInput::RIGHT; }
-//        if (action.name() == "UP") { input.dir &= ~CInput::UP; }
-//        if (action.name() == "DOWN") { input.dir &= ~CInput::DOWN; }
-//
-//        // If no movement keys are pressed, set state to "idle"
-//        if (input.dir == 0) {
-//            m_player->getComponent<CState>().state = "idle";
-//            m_player->addComponent<CAnimation>(Assets::getInstance().getAnimation("PlayerIdle"));
-//            m_player->getComponent<CInput>().dir = 0;
-//        }
-//
-//        /*if (input.attack == 0) {
-//            m_player->getComponent<CState>().state = "idle";
-//            m_player->addComponent<CAnimation>(Assets::getInstance().getAnimation("SamuraiIdle"));
-//            m_player->getComponent<CInput>().attack = 0;
-//        }*/
-//    }
-//}
+
 
 
 void Scene_BulletNinja::sDoAction(const Command& action)

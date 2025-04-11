@@ -11,10 +11,13 @@ Bkg Background 0 0
 Door		  door  	700		0		0
 Door 		  door 		2000		1		200
 Door		  door  	2600		0		0
-Door 		  door 		3000		1		300
+Door 		  door 		3500		1		300
 
 # spawn enemies
 Tree BloodTree_Glowing 900
 Tree BloodTree_Glowing 1200
 Tree BloodTree_Glowing 1500
 Tree BloodTree_Glowing 1800
+
+Tree BloodTree_Glowing 2800
+Tree BloodTree_Glowing 3100
