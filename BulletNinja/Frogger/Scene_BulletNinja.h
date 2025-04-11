@@ -12,12 +12,26 @@
 #include "Scene.h"
 #include "GameEngine.h"
 #include <queue>
+#include <cmath>
 
 enum BBType
 {
     Hitbox,
     Attackbox
 };
+
+
+struct SpawnDoorPoint {
+    std::string name;
+    float x;
+    int type;  // 0 = entrance, 1 = exit
+    int requiredScore = 0;  // Only used for exit doors
+
+    auto operator<=>(const SpawnDoorPoint& other) const {
+        return x <=> other.x;
+    }
+};
+
 
 struct SpawnPoint {
     std::string name;
@@ -32,13 +46,14 @@ struct LevelConfig {
     float       cameraReactionSpeed{ 100.f };
     float       playerSpeed{ 100.f };
     float       enemySpeed{ 100.f };
+    float       enemyChaseDistance{ 150.f };
     
 };
 
 struct GroundCoord {
-    sf::Vector2f pos{ 0, 444.f };
+    sf::Vector2f pos{ 0, 344.f };
     float width{ 5000.f };
-    float height{ 1.f };
+    float height{ 10.f };
 };
 
 class Scene_BulletNinja : public Scene {
@@ -48,16 +63,18 @@ private:
     sf::FloatRect   m_worldBounds;
     LevelConfig     m_config;
     GroundCoord     m_ground;
-    std::priority_queue<SpawnPoint> _spawnPoints;
+    std::priority_queue<SpawnPoint> _spawnStaticPoints;
+    std::priority_queue<SpawnDoorPoint> _spawnDoorPoints;
 
     float           m_speed = 15.f;
     float           m_jumpStrength = 18.f;
-    float           m_gravity = 1.f;
+    float           m_gravity = 0.9f;
     float           m_maxFallSpeed = 15.f;
 
     bool			m_drawTextures{ true };
     bool			m_drawAABB{ false };
     bool			m_drawGrid{ false };
+    std::shared_ptr<Entity> m_nearestExitDoor;
 
     sf::Text        m_text;
     sf::Time        m_timer;
@@ -77,9 +94,12 @@ private:
 
     // helper functions
     void            playerMovement(sf::Time dt);
-    void            enemyMovement();
+    void            enemyMovement(sf::Time dt);
     void            updateEnemyMovement(std::shared_ptr<Entity> enemy, sf::Vector2f& nextPos, std::string& anim, const std::string& curAnim, CTransform& enemyTransform, const CTransform& playerTransform);
-    void            adjustEntityMovement(std::shared_ptr<Entity> e);
+
+    void            playerCheckState();
+    bool            hasObstacleBetween(std::shared_ptr<Entity> enemy, const sf::Vector2f& targetPos);
+    void            resolveDoorCollision(std::shared_ptr<Entity> player, std::shared_ptr<Entity> door, sf::Vector2f overlap);
 
     // Collision
     bool            isCollidingWithWalls(std::shared_ptr<Entity> e, sf::Vector2f& nextPos);
@@ -93,14 +113,17 @@ private:
     void            spawnBox(sf::Vector2f pos);
     void            spawnEnemy(sf::Vector2f pos);
     void            SpawnStaticObject(std::string name, float x);
+    void            SpawnDoorObject(std::string name, float x, int type = 0, int requiredScore = 0);
     void            sSpawnStaticObjects();
     void            updateCamera();
+    void            updateDoors();
+    void            updatePlayerAnimation();
+    void            attackCollisions();
     //void            updateEntity(Entity& entity, sf::Time dt);
 
  
 
     void            resetPlayer();
-    void            killPlayer();
 
     void            updateScore();
 

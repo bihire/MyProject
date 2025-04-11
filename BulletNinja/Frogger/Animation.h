@@ -14,6 +14,7 @@ public:
     sf::Time                    _countDown{ sf::Time::Zero };
     bool                        _isRepeating{ true };
     bool                        _hasEnded{ false };
+    bool                        _isReversed{ false }; // to reverse animation
     sf::Sprite                  _sprite;
     std::vector<int>            _hitboxFrames;   // New: Hitbox frames
     std::vector<int>            _attackboxFrames; // New: Attackbox frames
@@ -31,6 +32,18 @@ public:
     sf::Vector2f            getBB() const;
     int                     getCurFrame() const;
     int                     getFramesSize() const;
+    void                    setRepeating(bool repeat);
+
+    // New reverse playback methods
+    void                    setReversed(bool reversed);
+    bool                    isReversed() const;
+    void                    toggleReversed();
+    void                    playForward();
+    void                    playBackward();
+    void                    play();
+    bool                    isPlaying() const ;
+
+
 
     
     void                    setHitboxFrames(int start, int end);

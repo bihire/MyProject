@@ -16,8 +16,9 @@
 
 namespace Physics
 {
-	sf::Vector2f	getOverlap(std::shared_ptr<Entity> a, std::shared_ptr<Entity> b);
-    sf::Vector2f	getPreviousOverlap(std::shared_ptr<Entity> a, std::shared_ptr<Entity> b);
+	sf::Vector2f	getOverlap(const sf::FloatRect& a, const sf::FloatRect& b);
+	sf::Vector2f	getPreviousOverlap(const sf::FloatRect& a, const sf::Vector2f& aOffset,
+		const sf::FloatRect& b, const sf::Vector2f& bOffset);
 
 	//bool			isOnGround(const std::shared_ptr<Entity>& entity, const sf::Vector2f& groundPos, float groundHeight);
 

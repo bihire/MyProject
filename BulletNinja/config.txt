@@ -25,6 +25,7 @@ Texture playerIdle        ../assets/Textures/playerIdle.png
 Texture playerRun        ../assets/Textures/playerRun.png
 Texture playerAttackSpear        ../assets/Textures/playerAttackSpear.png
 Texture playerAttackSword        ../assets/Textures/playerAttackSword.png
+Texture Door        	../assets/Textures/door.png
 
 Texture BloodTree        ../assets/Textures/BloodTree112x128.png
 
@@ -54,6 +55,7 @@ JSON                    ../assets/Textures/playerAttackSpear.json
 JSON                    ../assets/Textures/playerAttackSword.json
 
 JSON                    ../assets/Textures/BloodTreeGlowing.json
+JSON                    ../assets/Textures/door.json
 
 
 
@@ -96,3 +98,4 @@ Animation   PlayerAttackSword       playerAttackSword   27     yes      0       
 
 
 Animation   BloodTree_Glowing		    BloodTree		7      yes      0            0          0               0
+Animation   door		    Door		20      no      0            0          0               0

@@ -18,30 +18,77 @@ Animation::Animation(const std::string& name,
     std::cout << name << " tpf: " << _timePerFrame.asMilliseconds() << "ms\n";
 }
 
+//void Animation::update(sf::Time dt) {
+//    _countDown -= dt;
+//    if (_countDown < sf::Time::Zero) {
+//        _countDown = _timePerFrame;
+//        _currentFrame += 1;
+//
+//        if (_currentFrame >= _frames.size() && !_isRepeating) {
+//            _hasEnded = true;
+//            return;  // on the last frame of non-repeating animation, leave it
+//        } else {
+//            
+//            _currentFrame = (_currentFrame % _frames.size());
+//            if (onFrameChange) {
+//                onFrameChange();  // Notify listener
+//            }
+//
+//        }
+//        _sprite.setTextureRect(_frames[_currentFrame]);
+//        centerOrigin(_sprite);
+//    }
+//}
+
 void Animation::update(sf::Time dt) {
+    if (_hasEnded && !_isRepeating) return;
+
     _countDown -= dt;
     if (_countDown < sf::Time::Zero) {
         _countDown = _timePerFrame;
-        _currentFrame += 1;
 
-        if (_currentFrame >= _frames.size() && !_isRepeating) {
-            _hasEnded = true;
-            return;  // on the last frame of non-repeating animation, leave it
-        } else {
-            
-            _currentFrame = (_currentFrame % _frames.size());
-            if (onFrameChange) {
-                onFrameChange();  // Notify listener
+        if (_isReversed) {
+            if (_currentFrame == 0) {
+                _hasEnded = true;
+                if (_isRepeating) {
+                    _currentFrame = _frames.size() - 1;
+                    _hasEnded = false;
+                }
             }
-
+            else {
+                _currentFrame--;
+            }
         }
+        else {
+            if (_currentFrame >= _frames.size() - 1) {
+                _hasEnded = true;
+                if (_isRepeating) {
+                    _currentFrame = 0;
+                    _hasEnded = false;
+                }
+            }
+            else {
+                _currentFrame++;
+            }
+        }
+
         _sprite.setTextureRect(_frames[_currentFrame]);
         centerOrigin(_sprite);
+        if (hasEnded() && onFrameChange) {
+            onFrameChange();
+        }
     }
 }
 
+void Animation::setRepeating(bool repeat) {
+	_isRepeating = repeat;
+}
+
 bool Animation::hasEnded() const {
-    return (_currentFrame >= _frames.size());
+    return _currentFrame >= _frames.size() -1 ;
+    //if (_isRepeating) return false;
+    //if (_isReversed) return (_currentFrame == 0 && _countDown < sf::Time::Zero);
+    //return (_currentFrame >= _frames.size() - 1 && _countDown < sf::Time::Zero);
 }
 
 const std::string& Animation::getName() const {
@@ -84,6 +131,42 @@ const std::vector<int>& Animation::getHitboxFrames() const {
 
 const std::vector<int>& Animation::getAttackboxFrames() const {
     return _attackboxFrames;
+}
+
+// reverse methods
+void Animation::setReversed(bool reversed) {
+    _isReversed = reversed;
+}
+
+bool Animation::isReversed() const {
+    return _isReversed;
+}
+
+void Animation::toggleReversed() {
+    _isReversed = !_isReversed;
+}
+
+void Animation::playForward() {
+    _isReversed = false;
+    _hasEnded = false;
+    _currentFrame = 0;
+    _countDown = _timePerFrame;
+}
+
+void Animation::play() {
+    _hasEnded = false;
+    _countDown = _timePerFrame;
+}
+
+bool Animation::isPlaying() const {
+    return !_hasEnded;
+}
+
+void Animation::playBackward() {
+    _isReversed = true;
+    _hasEnded = false;
+    _currentFrame = _frames.size() - 1;
+    _countDown = _timePerFrame;
 }
 
 

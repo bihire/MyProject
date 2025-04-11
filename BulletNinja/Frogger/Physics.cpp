@@ -2,45 +2,36 @@
 #include <cmath>
 #include "Scene_BulletNinja.h"
 
-sf::Vector2f Physics::getOverlap(std::shared_ptr<Entity> a, std::shared_ptr<Entity> b)
+sf::Vector2f Physics::getOverlap(const sf::FloatRect& a, const sf::FloatRect& b)
 {
-    sf::Vector2f overlap(0.f, 0.f);
-    if (!a->hasComponent<CBoundingBox>() or !b->hasComponent<CBoundingBox>())
-        return overlap;
+    float dx = std::min(a.left + a.width, b.left + b.width) - std::max(a.left, b.left);
+    float dy = std::min(a.top + a.height, b.top + b.height) - std::max(a.top, b.top);
 
-    auto atx = a->getComponent<CTransform>();
-    auto abb = a->getComponent<CBoundingBox>();
-    auto btx = b->getComponent<CTransform>();
-    auto bbb = b->getComponent<CBoundingBox>();
-
-
-    if (abb.has && bbb.has)
-    {
-        float dx = std::abs(atx.pos.x - btx.pos.x);
-        float dy = std::abs(atx.pos.y - btx.pos.y);
-        overlap = sf::Vector2f(abb.halfSize.x + bbb.halfSize.x - dx, abb.halfSize.y + bbb.halfSize.y - dy);
-    }
-    return overlap;
+    if (dx < 0.f || dy < 0.f)
+        return sf::Vector2f(0.f, 0.f);
+    return sf::Vector2f(dx, dy);
 }
 
-sf::Vector2f Physics::getPreviousOverlap(std::shared_ptr<Entity> a, std::shared_ptr<Entity> b)
+sf::Vector2f Physics::getPreviousOverlap(const sf::FloatRect& a, const sf::Vector2f& aOffset,
+    const sf::FloatRect& b, const sf::Vector2f& bOffset)
 {
-    sf::Vector2f overlap(0.f, 0.f);
-    if (!a->hasComponent<CBoundingBox>() or !b->hasComponent<CBoundingBox>())
-        return overlap;
+    sf::FloatRect aPrev = a;
+    sf::FloatRect bPrev = b;
 
-    auto atx = a->getComponent<CTransform>();
-    auto abb = a->getComponent<CBoundingBox>();
-    auto btx = b->getComponent<CTransform>();
-    auto bbb = b->getComponent<CBoundingBox>();
+    aPrev.left -= aOffset.x;
+    aPrev.top -= aOffset.y;
 
-    if (abb.has && bbb.has)
-    {
-        float dx = std::abs(atx.prevPos.x - btx.prevPos.x);
-        float dy = std::abs(atx.prevPos.y - btx.prevPos.y);
-        overlap = sf::Vector2f(abb.halfSize.x + bbb.halfSize.x - dx, abb.halfSize.y + bbb.halfSize.y - dy);
-    }
-    return overlap;
+    bPrev.left -= bOffset.x;
+    bPrev.top -= bOffset.y;
+
+    float dx = std::min(aPrev.left + aPrev.width, bPrev.left + bPrev.width) -
+        std::max(aPrev.left, bPrev.left);
+    float dy = std::min(aPrev.top + aPrev.height, bPrev.top + bPrev.height) -
+        std::max(aPrev.top, bPrev.top);
+
+    if (dx < 0.f || dy < 0.f)
+        return sf::Vector2f(0.f, 0.f);
+    return sf::Vector2f(dx, dy);
 }
 
 //bool Physics::isOnGround(const std::shared_ptr<Entity>& entity, const sf::Vector2f& groundPos, float groundHeight)
@@ -58,6 +49,8 @@ sf::Vector2f Physics::getPreviousOverlap(std::shared_ptr<Entity> a, std::shared_
 //
 //    return entityBB.intersects(groundBB);
 //}
+
+
 
 
 

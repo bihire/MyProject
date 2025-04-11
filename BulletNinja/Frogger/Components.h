@@ -104,35 +104,67 @@ struct CHitTracker : public Component {
 struct CAnimation : public Component {
     Animation animation;
     std::shared_ptr<std::atomic<uint64_t>> key;
+    std::function<void()> onAnimationEnd;
 
-    CAnimation() = default;
+    CAnimation() : key(std::make_shared<std::atomic<uint64_t>>(0)) {}
 
     CAnimation(const Animation& a)
-        : animation(a), key(std::make_shared<std::atomic<uint64_t>>(0)) {
+        : animation(a),
+        key(std::make_shared<std::atomic<uint64_t>>(0)) {
         bindKey();
     }
 
     void bindKey() {
-        animation.onFrameChange = [this]() {
-            // Increment the atomic key when the frame changes
-            key->fetch_add(1, std::memory_order_relaxed);
+        // Store the existing onAnimationEnd
+        auto existingCallback = onAnimationEnd;
+
+        animation.onFrameChange = [this, existingCallback]() {
+            
+            std::cout << "Animation key changed: " << key << std::endl;
+            std::cout << "animation name: " << animation.getName() << std::endl;
+            
+            if (existingCallback) existingCallback();
+            if (onAnimationEnd) onAnimationEnd();
             };
-
-
     }
 
     CAnimation(const CAnimation& other)
-        : animation(other.animation), key(other.key) {
+        : animation(other.animation),
+        key(other.key),
+        onAnimationEnd(other.onAnimationEnd) {  // Copy the callback!
         bindKey();
+    }
+
+    uint64_t getCurrentKey() const {
+        return key->load();
     }
 
     CAnimation& operator=(const CAnimation& other) {
         if (this != &other) {
+            // Preserve our callback during assignment
+            auto oldCallback = onAnimationEnd;
+
             animation = other.animation;
             key = other.key;
+            onAnimationEnd = other.onAnimationEnd;
+
             bindKey();
+
+            // Restore if we had different callback
+            if (oldCallback && !other.onAnimationEnd) {
+                onAnimationEnd = oldCallback;
+            }
         }
         return *this;
+    }
+
+    
+    void setAnimation(const Animation& newAnim) {
+        auto oldFrameChange = animation.onFrameChange;
+        animation = newAnim;
+        key = std::make_unique<std::atomic<uint64_t>>(0);
+        animation.onFrameChange = oldFrameChange;  // Preserve the callback
+        animation.play();
     }
 };
 
@@ -155,35 +187,103 @@ struct CPhysics : public Component {
     sf::Vector2f velocity = { 0.f, 0.f };
 };
 
+//struct CState : public Component {
+//    std::string state{"none"};
+//
+//    CState() = default;
+//    CState(const std::string& s) : state(s){}
+//
+//};
+
 struct CState : public Component {
-    std::string state{"none"};
+    enum State {
+        isGrounded = 1,
+        isFacingLeft = 1 << 1,
+        isRunning = 1 << 2,
+        isAttackSword = 1 << 3,
+        isAttackSpear = 1 << 4,
+        isDead = 1 << 5,
+        isJumping = 1 << 6,
+        isFalling = 1 << 7,
+        wasRunning = 1 << 8,      
+        wasGrounded = 1 << 9,
+        isAttacking = 1 << 10
+    };
+    unsigned int state{ 0 };
 
     CState() = default;
-    CState(const std::string& s) : state(s){}
+    CState(unsigned int s) : state(s) {}
 
+    bool test(unsigned int x) const { return (state & x); }
+    void set(unsigned int x) { state |= x; }
+    void unSet(unsigned int x) { state &= ~x; }
+
+    // check state changes
+    bool becameGrounded() const { return test(isGrounded) && !test(wasGrounded); }
+    bool becameAirborne() const { return !test(isGrounded) && test(wasGrounded); }
+    bool startedRunning() const { return test(isRunning) && !test(wasRunning); }
+    bool stoppedRunning() const { return !test(isRunning) && test(wasRunning); }
+
+    // Call this at the end of each frame to update previous states
+    void updatePreviousStates() {
+        if (test(isRunning)) set(wasRunning);
+        else unSet(wasRunning);
+
+        if (test(isGrounded)) set(wasGrounded);
+        else unSet(wasGrounded);
+    }
 };
 
+struct CDoorState : public Component {
+    enum State { Open, Closed, Opening, Closing };
+    enum Type { Entrance, Exit };
+
+    State state;
+    Type type;
+    int minScoreToOpen; 
+    bool leftSideUsed;
+
+    CDoorState(Type doorType = Exit, int minScore = 0)
+        : state(Closed), type(doorType), minScoreToOpen(minScore), leftSideUsed(false) {}
+};
+
+
+//struct CInput : public Component
+//{
+//    enum dirs {
+//        UP      = 1 << 0,
+//        DOWN    = 1 << 1,
+//        LEFT    = 1 << 2,
+//        RIGHT   = 1 << 3
+//        
+//    };
+//
+//    enum attacks {
+//        SWORD = 1 << 0,
+//        SPEAR = 1 << 1
+//    };
+//
+//    unsigned char dir{0};
+//    unsigned char attack{0};
+//
+//    CInput() = default;
+//};
 
 struct CInput : public Component
 {
-    enum dirs {
-        UP      = 1 << 0,
-        DOWN    = 1 << 1,
-        LEFT    = 1 << 2,
-        RIGHT   = 1 << 3
-        
-    };
+    bool UP{ false };
+    bool LEFT{ false };
+    bool RIGHT{ false };
+    bool DOWN{ false };
 
-    enum attacks {
-        SWORD = 1 << 0,
-        SPEAR = 1 << 1
-    };
+    bool SWORD{ false };
+    bool SPEAR{ false };
 
-    unsigned char dir{0};
-    unsigned char attack{0};
+    bool canJump{ true };
 
     CInput() = default;
 };
+
 
 
 #endif //BREAKOUT_COMPONENTS_H
