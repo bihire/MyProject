@@ -1,23 +1,111 @@
-# Level 1
-
-World 5600 600
-
 #EntitySpeeds			camera		player		enemy
 Speeds 				  75		  2		  1
 
 Bkg Background 0 0
 
-# spawn Doors     animation	pos		type 		maxScore
-Door		  door  	700		0		0
-Door 		  door 		2000		1		200
-Door		  door  	2600		0		0
-Door 		  door 		3500		1		300
 
-# spawn enemies
+### Level 1
+
+# spawn Doors     animation	pos		type 		maxScore     dungeonID
+Door		  door  	700		0		0		0
+Door 		  door 		3500		1		200		1
+
+# spawn Statics objects
 Tree BloodTree_Glowing 900
 Tree BloodTree_Glowing 1200
 Tree BloodTree_Glowing 1500
 Tree BloodTree_Glowing 1800
-
 Tree BloodTree_Glowing 2800
 Tree BloodTree_Glowing 3100
+
+# spawn enemy objects
+# spawnEnemies		xPos		BBx		BBy		scale		lives		health		level
+
+FlowerEnemy		1200		40		40		4		1		  30		  1
+FlowerEnemy		1900		40		40		4		1		  30		  1
+FlowerEnemy		2400		40		40		4		1		  30		  1
+
+
+
+
+# spawn Tiles
+# Tiles			animation	posx		BBx		BBy		level
+WoodenBox			  	900		80		80		  1
+WoodenBox			  	950		80		80		  1
+WoodenBox			  	1000		80		80		  1
+WoodenBox			  	1400		80		80		  1
+WoodenBox			  	1481		80		80		  1
+
+WoodenBox			  	1581		80		80		  1
+WoodenBox			  	1630		80		80		  1
+WoodenBox			  	1700		80		80		  1
+WoodenBox			  	1700		80		80		  1
+WoodenBox			  	1730		80		80		  1
+
+
+WoodenBox			  	2181		80		80		  1
+
+WoodenBox			  	2681		80		80		  1
+WoodenBox			  	2730		80		80		  1
+WoodenBox			  	2800		80		80		  1
+WoodenBox			  	2900		80		80		  1
+WoodenBox			  	2930		80		80		  1
+
+
+
+# spawn Tiles
+# Tiles			animation	posx		posy		BBx		BBy		level
+Tile				  	2000		400		192		  32		  1
+Tile				  	2400		500		192		  32		  1
+
+
+
+
+
+
+
+### level 2
+
+# spawn Doors     animation	pos		type 		maxScore     dungeonID
+Door		  door  	4200		 0		  0		1
+Door 		  door 		6700		 1		 300		2
+
+
+# spawn Statics objects
+Tree BloodTree_Glowing 4400
+Tree BloodTree_Glowing 4700
+Tree BloodTree_Glowing 5000
+Tree BloodTree_Glowing 5300
+Tree BloodTree_Glowing 6300
+Tree BloodTree_Glowing 6600
+
+# spawn enemy objects
+# spawnEnemies		xPos		BBx		BBy		scale		lives		health		level
+NinjaEnemy		4800		52		102		4		1		30		2
+NinjaEnemy		5400		52		102		4		1		30		2
+NinjaEnemy		5900		52		102		4		1		30		2
+FlowerEnemy		4700		40		40		4		1		30		2
+
+# spawn Tiles
+# Tiles		animation	posx		BBx		BBy		level
+WoodenBox			4400		80		80		2
+
+WoodenBox			4500		80		80		2
+WoodenBox			4900		80		80		2
+WoodenBox			4981		80		80		2
+WoodenBox			5081		80		80		2
+WoodenBox			5130		80		80		2
+WoodenBox			5200		80		80		2
+WoodenBox			5200		80		80		2
+WoodenBox			5230		80		80		2
+WoodenBox			5681		80		80		2
+WoodenBox			6181		80		80		2
+WoodenBox			6230		80		80		2
+WoodenBox			6300		80		80		2
+WoodenBox			6400		80		80		2
+
+
+# spawn Tiles
+# Tiles			animation	posx		posy		BBx		BBy		level
+Tile				5500		400		192		32		2
+Tile				5900		500		192		32		2

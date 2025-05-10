@@ -30,6 +30,7 @@ public:
 	Scene(GameEngine* gameEngine);
     virtual ~Scene();
 
+	void				setQuestStatus(bool status);
 	virtual void		update(sf::Time dt) = 0;
 	virtual void		sDoAction(const Command& action) = 0;
 	virtual void		sRender() = 0;
@@ -37,6 +38,8 @@ public:
 	void				simulate(int);
 	void				doAction(Command);
 	void				registerAction(int, std::string);
-	const CommandMap	getActionMap() const;
+	const CommandMap	getActionMap() const;	
+
+	
 };
 

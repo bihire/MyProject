@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\Scene_BulletNinja">
+      <UniqueIdentifier>{d9f4caa5-d5c8-4bbe-8bf1-4214e673b9df}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Scene_Menu">
+      <UniqueIdentifier>{aad908fc-b1ce-40bf-a140-e8f598d492be}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Animation.cpp">
@@ -45,16 +51,58 @@
     <ClCompile Include="Scene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Scene_BulletNinja.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Scene_Menu.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="SoundPlayer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Utilities.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene_BulletNinja.cpp">
+      <Filter>Source Files\Scene_BulletNinja</Filter>
+    </ClCompile>
+    <ClCompile Include="NinjaEnemy.cpp">
+      <Filter>Source Files\Scene_BulletNinja</Filter>
+    </ClCompile>
+    <ClCompile Include="NinjaPlayer.cpp">
+      <Filter>Source Files\Scene_BulletNinja</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene_BulletNinja_Utils.cpp">
+      <Filter>Source Files\Scene_BulletNinja</Filter>
+    </ClCompile>
+    <ClCompile Include="QuestDoor.cpp">
+      <Filter>Source Files\Scene_BulletNinja</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene_BulletNinja_Collisions.cpp">
+      <Filter>Source Files\Scene_BulletNinja</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene_Menu.cpp">
+      <Filter>Source Files\Scene_Menu</Filter>
+    </ClCompile>
+    <ClCompile Include="MenuItem.cpp">
+      <Filter>Source Files\Scene_Menu</Filter>
+    </ClCompile>
+    <ClCompile Include="MenuCategory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PlayerProgress.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WoodenBox.cpp">
+      <Filter>Source Files\Scene_BulletNinja</Filter>
+    </ClCompile>
+    <ClCompile Include="FlowerEnemy.cpp">
+      <Filter>Source Files\Scene_BulletNinja</Filter>
+    </ClCompile>
+    <ClCompile Include="Tile.cpp">
+      <Filter>Source Files\Scene_BulletNinja</Filter>
+    </ClCompile>
+    <ClCompile Include="key.cpp">
+      <Filter>Source Files\Scene_BulletNinja</Filter>
+    </ClCompile>
+    <ClCompile Include="InGameMenu.cpp">
+      <Filter>Source Files\Scene_BulletNinja</Filter>
+    </ClCompile>
+    <ClCompile Include="MenuCard.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -104,8 +152,18 @@
     <ClInclude Include="Utilities.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="MenuCategory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayerProgress.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MenuCard.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Program.cs" />
+    <None Include="shadow.frag" />
   </ItemGroup>
 </Project>

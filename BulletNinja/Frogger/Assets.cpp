@@ -17,6 +17,37 @@ Assets& Assets::getInstance() {
     return instance;
 }
 
+void Assets::addShader(const std::string& shaderName, const std::string& fragPath, const std::string& vertPath) {
+    auto shader = std::make_unique<sf::Shader>();
+    bool loaded = false;
+
+    if (vertPath.empty()) {
+        loaded = shader->loadFromFile(fragPath, sf::Shader::Fragment);
+    }
+    else {
+        loaded = shader->loadFromFile(vertPath, fragPath);
+    }
+
+    if (!loaded) {
+        std::cerr << "Failed to load shader: " << shaderName << std::endl;
+        std::cerr << "Fragment path: " << fragPath << std::endl;
+        if (!vertPath.empty()) {
+            std::cerr << "Vertex path: " << vertPath << std::endl;
+        }
+        return; // or throw an exception
+    }
+
+    m_shaderMap[shaderName] = std::move(shader);
+}
+
+sf::Shader& Assets::getShader(const std::string& shaderName) {
+    auto it = m_shaderMap.find(shaderName);
+    if (it == m_shaderMap.end()) {
+        throw std::runtime_error("Shader not found: " + shaderName);
+    }
+    return *it->second;
+}
+
 void Assets::addFont(const std::string& fontName, const std::string& path) {
     std::unique_ptr<sf::Font> font(new sf::Font);
     if (!font->loadFromFile(path))
@@ -301,6 +332,29 @@ void Assets::loadSprts(const std::string& path) {
     confFile.close();
 }
 
+void Assets::loadShaders(const std::string& path) {
+    std::ifstream confFile(path);
+    if (!confFile) {
+        throw std::runtime_error("Failed to open assets file: " + path);
+    }
+
+    std::string token;
+    while (confFile >> token) {
+        if (token == "Shader") {
+            std::string name, fragPath, vertPath;
+            confFile >> name >> fragPath;
+
+            // Check if a vertex shader is also provided
+            if (confFile.peek() != '\n' && confFile.peek() != '\r') {
+                confFile >> vertPath;
+            }
+
+            addShader(name, fragPath, vertPath);
+        }
+        // ... (keep existing parsing logic for other asset types)
+    }
+}
+
 
 void Assets::loadFromFile(const std::string path) {
     loadFonts(path);
@@ -309,4 +363,5 @@ void Assets::loadFromFile(const std::string path) {
     loadSounds(path);
     loadJson(path);
     loadAnimations(path);  // requires loadJson be run first
+    loadShaders(path);
 }

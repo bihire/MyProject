@@ -1,6 +1,6 @@
 # GameEngine Config
 
-Window  600 600 partial
+Window  600 600 fullscreen
 
 Font    Arial           ../assets/fonts/arial.ttf
 Font    main            ../assets/fonts/Sansation.ttf
@@ -9,10 +9,16 @@ Font    Arcade          ../assets/fonts/arcadeclassic.regular.ttf
 Music gameTheme         ../assets/Music/frogger.ogg
 Music missionTheme      ../assets/Music/tweener.ogg
 
+#Shaders
+Shader shadow 		../assets/Shaders/shadow.frag
+Shader hit 		../assets/Shaders/hit_effect.frag
+
 # Textures
 Texture Background      ../assets/Textures/background.png
+Texture GlassyBackground      ../assets/Textures/glassy-bkg.png
 Texture Title           ../assets/Textures/FroggerTitle.png
 Texture Entities        ../assets/Textures/FroggerAtlas.png
+Texture Menu        ../assets/Textures/menu-icons.png
 
 Texture SamuraiDeath        ../assets/Textures/SamuraiDeath.png
 Texture SamuraiIdle        ../assets/Textures/SamuraiIdle.png
@@ -31,6 +37,12 @@ Texture BloodTree        ../assets/Textures/BloodTree112x128.png
 
 Texture box        ../assets/Textures/box_cropped.png
 
+Texture FlowerEnemy        ../assets/Textures/FlowerEnemy.png
+
+Texture Tileset        ../assets/Textures/Tileset.png
+Texture Cross        ../assets/Textures/cross.png
+Texture TrophyKey        ../assets/Textures/key.png
+
 # Sprites
 Sprite Background       Background   0 0  480 600
 Sprite Title            Title 0 0 480 600
@@ -41,6 +53,7 @@ Sound death             ../assets/Sound/froggerDie.wav
 Sound hop               ../assets/Sound/froggerMove.wav
 
 JSON                    ../assets/Textures/FroggerAtlas.json
+JSON                    ../assets/Textures/menu.json
 
 JSON                    ../assets/Textures/SamuraiIdle.json
 JSON                    ../assets/Textures/SamuraiDeath.json
@@ -57,34 +70,17 @@ JSON                    ../assets/Textures/playerAttackSword.json
 JSON                    ../assets/Textures/BloodTreeGlowing.json
 JSON                    ../assets/Textures/door.json
 
+JSON                    ../assets/Textures/woodenBox.json
+JSON                    ../assets/Textures/FlowerEnemy.json
+
+JSON                    ../assets/Textures/Tileset.json
+JSON                    ../assets/Textures/cross.json
+JSON                    ../assets/Textures/key.json
+
 
 
 #
 #Animation   Name                    Texture             Speed  Repeats  HitboxStart  HitboxEnd  AttackboxStart  AttackboxEnd
-Animation   up                      Entities            8      no       0            0          0               0
-Animation   down                    Entities            8      no       0            0          0               0
-Animation   left                    Entities            8      no       0            0          0               0
-Animation   right                   Entities            8      no       0            0          0               0
-Animation   die                     Entities            8      no       0            0          0               0
-
-Animation   2turtles                Entities            1      yes      0            0          0               0
-Animation   3turtles                Entities            1      yes      0            0          0               0
-Animation   tree1                   Entities            1      no       0            0          0               0
-Animation   tree2                   Entities            1      no       0            0          0               0
-
-Animation   car                     Entities            1      no       0            0          0               0
-Animation   raceCarL                Entities            1      no       0            0          0               0
-Animation   raceCarR                Entities            1      no       0            0          0               0
-Animation   truck                   Entities            1      no       0            0          0               0
-Animation   tractor                 Entities            1      no       0            0          0               0
-
-Animation   bugIcon                 Entities            1      no       0            0          0               0
-Animation   croc                    Entities            1      yes      0            0          0               0
-Animation   crocIcon                Entities            1      no       0            0          0               0
-Animation   frogIcon                Entities            1      no       0            0          0               0
-Animation   lillyPad                Entities            1      no       0            0          0               0
-Animation   lives                   Entities            1      no       0            0          0               0
-
 Animation   SamuraiIdle             SamuraiIdle         7      yes      0            11         0               0
 Animation   SamuraiRun              SamuraiRun          7      yes      0            8          0               0
 Animation   SamuraiAttackSpear      SamuraiAttackSpear  27     yes      0            18         5               13
@@ -96,7 +92,24 @@ Animation   PlayerRun               playerRun           18     yes      0       
 Animation   PlayerAttackSpear       playerAttackSpear   27     yes      0            18         5               13
 Animation   PlayerAttackSword       playerAttackSword   27     yes      0            22         5               10
 
+Animation   play                	Menu            1      no       0            0          0               0
+Animation   controller                	Menu            1      no       0            0          0               0
+Animation   pause                	Menu            1      no       0            0          0               0
+Animation   ninja                	Menu            1      no       0            0          0               0
+
+Animation   woodenBox                	box             1      no       0            0          0               0
+
+Animation   tile                	Tileset         1      no       0            0          0               0
+Animation   cross                	Cross           1      no       0            0          0               0
+Animation   trophyKey                	TrophyKey       4      yes      0            0          0               3
+
+Animation   floweridle                	FlowerEnemy     1      no       0            0          0               0
+Animation   flowermove                	FlowerEnemy     5      yes      0            0          0               0
+Animation   flowerattack               	FlowerEnemy     7      yes      0            0          6               10
+Animation   flowerhit               	FlowerEnemy     7      yes      0            0          0               0
+Animation   flowerdeath               	FlowerEnemy     7      no       0            0          0               0
 
 
-Animation   BloodTree_Glowing		    BloodTree		7      yes      0            0          0               0
-Animation   door		    Door		20      no      0            0          0               0
+
+Animation   BloodTree_Glowing		 BloodTree	7      yes      0            0          0               0
+Animation   door		   	 Door		20      no      0            0          0               0

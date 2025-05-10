@@ -26,11 +26,6 @@ EntityVec& EntityManager::getEntities(const std::string& tag) {
 
 void EntityManager::update() {
     
-    removeDeadEntities(m_entities);
-    for (auto& [_, entityVec] : m_entityMap)
-        removeDeadEntities(entityVec);
-
-
     
     for (auto e : m_EntitiesToAdd)
     {
@@ -38,6 +33,12 @@ void EntityManager::update() {
         m_entityMap[e->getTag()].push_back(e);
     }
     m_EntitiesToAdd.clear();
+}
+
+void EntityManager::clearDeadEntities() {
+	removeDeadEntities(m_entities);
+	for (auto& [_, entityVec] : m_entityMap)
+		removeDeadEntities(entityVec);
 }
 
 

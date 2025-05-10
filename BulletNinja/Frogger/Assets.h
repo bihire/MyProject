@@ -49,6 +49,7 @@ private:
     std::map<std::string, Animation>                            m_animationMap;
     std::map<std::string, std::vector<sf::IntRect>>             m_frameSets;
     std::map<std::string, AnimationData>                        m_animationDataMap;
+    std::map<std::string, std::unique_ptr<sf::Shader>>          m_shaderMap;
 
 
     void loadFonts(const std::string& path);
@@ -57,6 +58,7 @@ private:
     void loadSounds(const std::string& path);
     void loadJson(const std::string& path);
     void loadAnimations(const std::string& path);
+    void loadShaders(const std::string& path);
 
 public:
     void loadFromFile(const std::string path);
@@ -64,14 +66,16 @@ public:
     void addSound(const std::string& soundEffectName, const std::string& path);
     void addTexture(const std::string& textureName, const std::string& path, bool smooth = true);
     void addSprite(const std::string& spriteName, const std::string& textureName, sf::IntRect);
+    void addShader(const std::string& shaderName, const std::string& fragPath, const std::string& vertPath = "");
 
     const sf::Font& getFont(const std::string& fontName) const;
     const sf::SoundBuffer& getSound(const std::string& fontName) const;
     const sf::Texture& getTexture(const std::string& textureName) const;
     const Sprite& getSprt(const std::string& sprtName) const;
     const Animation& getAnimation(const std::string& name) const;
-
     const AnimationData& getAnimationData(const std::string& name) const;
+
+    sf::Shader&     getShader(const std::string& shaderName);
 
 };
 

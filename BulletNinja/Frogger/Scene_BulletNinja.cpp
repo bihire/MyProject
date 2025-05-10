@@ -14,6 +14,7 @@
 #include "Assets.h"
 #include "SoundPlayer.h"
 #include <random>
+#include "PlayerProgress.h"
 
 namespace {
     std::random_device rd;
@@ -24,45 +25,87 @@ namespace {
 Scene_BulletNinja::Scene_BulletNinja(GameEngine* gameEngine, const std::string& levelPath)
     : Scene(gameEngine), m_worldView(gameEngine->window().getDefaultView())
 {   
+    auto& playerProgress = PlayerProgress::getInstance();
+    playerProgress.setLives(3);
+    playerProgress.setResetCurrentLevelCallBack([this]() {
+        resetLevel();
+        
+        });
+    init(levelPath);
+    
+}
+
+void Scene_BulletNinja::resetLevel() {
+    respawnPlayer();
+    auto& score = m_player->getComponent<CScore>();
+    score._hp = score._originalHp;
+    score._lives = score._originallives;
+    resetAllEntities();
+
+    for(auto& e : _entityManager.getEntities("trophyKey")) {
+        e->isActive();
+			e->getComponent<CKeyState>().reset();
+		
+	}
+}
+
+void Scene_BulletNinja::init(const std::string& levelPath) {
+    if (sf::Shader::isAvailable())
+    {
+        std::cout <<  "shaders are not available..." << std::endl;
+    }
+    
+    sf::Vector2u windowSize = _game->window().getSize();
+
+    // set m config
+    m_config.enemyChaseRange = windowSize.x;
+    
+    //float gameplayWidth = 600.f;
+    float gameplayWidth = windowSize.x ;
+    float gameplayHeight = windowSize.y;
+
+    // set view window width
+    m_sceneDimensions.m_gameplayWidth = gameplayWidth/2;
+
+    //set m_world height
+    m_ground.pos.y = (gameplayHeight*2)/3;
+    
+    float viewportWidth = gameplayWidth / windowSize.x;
+    float viewportX = (1.0f - viewportWidth) / 2.0f;
+
+    
+    m_worldView.setSize(gameplayWidth, gameplayHeight);
+    m_worldView.setCenter(gameplayWidth / 2, gameplayHeight / 2);
+    m_worldView.setViewport(sf::FloatRect(viewportX, 0.f, viewportWidth, 1.f));
+
+
+
+
+    // initialization
     loadLevel(levelPath);
     registerActions();
 
     m_text.setFont(Assets::getInstance().getFont("Arcade"));
-
-    sf::Vector2f spawnPos{   m_worldView.getSize().x / 2.f , m_worldView.getSize().y / 2.f };
-    std::cout << "=== m_worldBounds.width: " << m_worldBounds.width << "  m_worldView.y  " << m_worldView.getSize().y << "\n";
-
-
-    // _worldView is the camera. It's view is the same size as the render winwidow
-    // _worldBounds is the boundry of our game world.
-    // this is a vertical scroller, the camera starts at the bottlm of the game world bounds and scrolls up
-    // the player is spawned at the bottom of the world and the camera/game scroll up to the top of the world
+    m_text.setFillColor(sf::Color::Black);
+    sf::Vector2f spawnPos{ m_worldView.getSize().x / 2.f, m_worldView.getSize().y / 2.f };
+    
     m_worldView.setCenter(spawnPos);
-
-    // Spawn static objects
     sSpawnStaticObjects();
-    
-
-    //auto pos = m_worldView.getSize();
-
-    // To refactor
-    auto playerPos = sf::Vector2f{ spawnPos.x, spawnPos.y + 40.f };
-
-    //m_ground = playerPos;  // To do: move m_ground value to JSON file
-
-    auto boxPos = sf::Vector2f{ spawnPos.x + 800.f, spawnPos.y };
-    auto ePos = sf::Vector2f{ boxPos.x + 200.f, playerPos.y };
-    spawnPlayer(playerPos);
-    
-
-    spawnBox(boxPos);
+    spawnFlowerEnemies();
+    spawnTiles();
+    sSpawnDoorObjects();
 
 
-    //auto ePos2 = sf::Vector2f{ boxPos.x + 250.f, playerPos.y };
-    spawnEnemy(ePos);
-    //spawnEnemy(ePos2);
+    auto playerPos = sf::Vector2f{ m_doorGap /2.f, spawnPos.y - 200.f };
+    auto boxPos = sf::Vector2f{ playerPos.x + 800.f, playerPos.y + 200.f };
+    auto ePos = sf::Vector2f{ boxPos.x + 200.f, playerPos.y + 40.f };
+
 
    
+    spawnPlayer(playerPos);
+    spawnWoodenBoxes();
+    spawnKey();
+    spawnNinjaEnemies();
 
     m_timer = sf::seconds(60.0f);
     m_maxHeight = spawnPos.y;
@@ -70,141 +113,8 @@ Scene_BulletNinja::Scene_BulletNinja(GameEngine* gameEngine, const std::string& 
     m_lives = 3;
     m_reachGoal = 0;
 
-    
-
-    MusicPlayer::getInstance().play("gameTheme");
-    MusicPlayer::getInstance().setVolume(50);
-}
-
-void Scene_BulletNinja::init(const std::string& levelPath) {
-
-   
-}
-
-void Scene_BulletNinja::spawnPlayer(sf::Vector2f pos) {
-    m_player = _entityManager.addEntity("player");
-    m_player->addComponent<CTransform>(pos).scale = sf::Vector2f(4.f, 4.f);
-    m_player->addComponent<CState>();
-    m_player->addComponent<CBoundingBox>(sf::Vector2f(52.f, 102.f));
-    m_player->addComponent<CInput>();
-    m_player->addComponent<CJump>();
-    m_player->addComponent<CScore>(m_lives);
-    m_player->addComponent<CScore>(3, 200);
-    m_player->addComponent<CAnimation>(Assets::getInstance().getAnimation("PlayerIdle"));
-
-    auto& anim = m_player->getComponent<CAnimation>();
-    anim.onAnimationEnd = [this]() {
-        auto& state = m_player->getComponent<CState>();
-        auto& anim = m_player->getComponent<CAnimation>();
-
-        //std::cout << "Key at callback: " << anim.getCurrentKey() << "\n";
-
-        if (state.test(CState::isAttackSword) || state.test(CState::isAttackSpear)) {
-            state.unSet(CState::isAttacking);
-            state.unSet(CState::isAttackSword);
-            state.unSet(CState::isAttackSpear);
-            anim.setAnimation(Assets::getInstance().getAnimation("PlayerIdle"));
-        }
-        };
-    
-
-    
-}
-
-void Scene_BulletNinja::spawnEnemy(sf::Vector2f pos) {
-    auto enemy = _entityManager.addEntity("enemy");
-    enemy->addComponent<CTransform>(pos).scale = sf::Vector2f(4.f, 4.f);
-    enemy->addComponent<CState>();
-    enemy->addComponent<CBoundingBox>(sf::Vector2f(52.f, 102.f));
-    enemy->addComponent<CInput>(); 
-    enemy->addComponent<CScore>(1, 100);
-    auto& anim = enemy->addComponent<CAnimation>(Assets::getInstance().getAnimation("SamuraiIdle"));
-
-    
-    anim.onAnimationEnd = [this, enemy]() {
-        if (!enemy->isActive()) return;
-
-        auto& state = enemy->getComponent<CState>();
-        auto& anim = enemy->getComponent<CAnimation>();
-
-        if (state.test(CState::isAttacking)) {
-            
-            state.unSet(CState::isAttacking);
-            state.unSet(CState::isAttackSword);
-
-            
-            anim.setAnimation(Assets::getInstance().getAnimation("SamuraiIdle"));
-        }
-        };
-
-    
-    enemy->getComponent<CTransform>().vel = sf::Vector2f(0, 0);
-}
-
-void Scene_BulletNinja::spawnBox(sf::Vector2f pos) {
-    auto m_box = _entityManager.addEntity("box");
-    const sf::Texture& texture = Assets::getInstance().getTexture("box");
-    m_box->addComponent<CTransform>(pos).scale = sf::Vector2f(.5f, .5f);
-    //m_box->addComponent<CState>().state = "box";
-    m_box->addComponent<CBoundingBox>(sf::Vector2f(40.f, 40.f));
-    m_box->addComponent<CSprite>(texture).sprite;
-    m_box->addComponent<CScore>(1);
-}
-
-void Scene_BulletNinja::playerAttacks() {
-    if (!m_player->isActive() || m_player->getComponent<CState>().test(CState::isDead)) {
-        return;
-    }
-
-    auto& input = m_player->getComponent<CInput>();
-    auto& state = m_player->getComponent<CState>();
-    auto& anim = m_player->getComponent<CAnimation>();
-
-    
-    if (state.test(CState::isAttacking) && anim.animation.hasEnded()) {
-        std::cout << "CLEARING STALE ATTACK STATE\n";
-        state.unSet(CState::isAttacking);
-        state.unSet(CState::isAttackSword);
-        state.unSet(CState::isAttackSpear);
-        anim.animation = Assets::getInstance().getAnimation("PlayerIdle");
-    }
-
-    
-    if (state.test(CState::isAttacking)) {
-        return;
-    }
-
-    // Handle  attack
-    if (input.SWORD) {
-        state.set(CState::isAttacking);
-        state.set(CState::isAttackSword);
-
-        
-        Animation newAnim = Assets::getInstance().getAnimation("PlayerAttackSword");
-        newAnim.onFrameChange = anim.animation.onFrameChange;
-        anim.animation = newAnim;
-        anim.animation.setRepeating(false);
-        
-
-        input.SWORD = false;
-        
-    }
-    
-    else if (input.SPEAR) {
-        state.set(CState::isAttacking);
-        state.set(CState::isAttackSpear);
-
-        Animation newAnim = Assets::getInstance().getAnimation("PlayerAttackSpear");
-        newAnim.onFrameChange = anim.animation.onFrameChange; // Preserve callback
-        anim.animation = newAnim;
-        anim.animation.setRepeating(false);
-        
-
-        input.SPEAR = false;
-        //SoundPlayer::getInstance().play("spear_throw", m_player->getComponent<CTransform>().pos);
-    }
-
-    updateCamera();
+    //MusicPlayer::getInstance().play("gameTheme");
+    //MusicPlayer::getInstance().setVolume(50);
 }
 
 
@@ -212,94 +122,10 @@ void Scene_BulletNinja::playerAttacks() {
 
 
 
-void Scene_BulletNinja::playerMovement(sf::Time dt) {
-    auto& pt = m_player->getComponent<CTransform>();
-    auto& input = m_player->getComponent<CInput>();
-    auto& state = m_player->getComponent<CState>();
-    auto& anim = m_player->getComponent<CAnimation>();
-
-    // Reset horizontal velocity
-    pt.vel.x = 0.f;
-
-    // Handle movement input
-    bool movingLeft = input.LEFT;
-    bool movingRight = input.RIGHT;
-    bool wantsToMove = movingLeft || movingRight;
-
-    // Apply movement forces
-    if (movingLeft) {
-        pt.vel.x -= 1.f;
-        state.set(CState::isFacingLeft);
-        state.set(CState::isRunning); 
-    }
-    else if (movingRight) {
-        pt.vel.x += 1.f;
-        state.unSet(CState::isFacingLeft);
-        state.set(CState::isRunning); 
-    }
-    else {
-        state.unSet(CState::isRunning);
-    }
-
-    // Animation state management
-    std::string desiredAnim = anim.animation.getName();
 
 
 
-    if (state.test(CState::isDead)) {
-        desiredAnim = "PlayerDead";
-    }
-    else if (state.test(CState::isAttackSword)) {
-        desiredAnim = "PlayerAttackSword";
-    }
-    else if (state.test(CState::isAttackSpear)) {
-        desiredAnim = "PlayerAttackSpear";
-    }
-    else if (state.test(CState::isRunning)) {
-        desiredAnim = "PlayerRun";
-    }
-    else if (!state.test(CState::isGrounded)) {
-        desiredAnim = (pt.vel.y > 0) ? "PlayerIdle" : "PlayerIdle"; 
-    }
-    
-    else {
-        desiredAnim = "PlayerIdle";
-    }
 
-    // Only change animation if needed
-    if (desiredAnim != anim.animation.getName()) {
-        anim.setAnimation(Assets::getInstance().getAnimation(desiredAnim));
-        
-    }
-
-    // Handle jumping
-    if (input.UP && state.test(CState::isGrounded)) {
-        input.UP = false;
-        pt.vel.y = -m_jumpStrength;
-        state.set(CState::isJumping);
-        state.unSet(CState::isGrounded);
-    }
-
-    // Apply physics
-    if (!state.test(CState::isGrounded)) {
-        pt.vel.y += m_gravity;
-    }
-    pt.vel.x *= m_speed;
-
-    // Update facing direction
-    pt.scale.x = state.test(CState::isFacingLeft)
-        ? -std::abs(pt.scale.x)
-        : std::abs(pt.scale.x);
-
-    // Move all entities
-    for (auto e : _entityManager.getEntities()) {
-        auto& tx = e->getComponent<CTransform>();
-        tx.prevPos = tx.pos;
-        tx.pos += tx.vel;
-    }
-
-    updateCamera();
-}
 
 bool Scene_BulletNinja::isCollidingWithWalls(std::shared_ptr<Entity> entity, sf::Vector2f& nextPos) {
     
@@ -307,10 +133,6 @@ bool Scene_BulletNinja::isCollidingWithWalls(std::shared_ptr<Entity> entity, sf:
     auto& scale = entity->getComponent<CTransform>().scale;
     
     entityBB.left = scale.x == -std::abs(scale.x) ? nextPos.x - 15.f : nextPos.x - 40.f;
-    
-
-    
-
     
     for (auto& wall : _entityManager.getEntities("box")) {
         sf::FloatRect wallBB = calculateBoundingBox(wall, Hitbox);
@@ -337,132 +159,6 @@ bool Scene_BulletNinja::isCollidingWithWalls(std::shared_ptr<Entity> entity, sf:
 }
 
 
-bool Scene_BulletNinja::hasObstacleBetween(std::shared_ptr<Entity> enemy, const sf::Vector2f& playerPos) {
-    // Get positions
-    sf::Vector2f enemyPos = enemy->getComponent<CTransform>().pos;
-
-    // Determine direction (left or right)
-    bool playerIsRight = playerPos.x > enemyPos.x;
-
-    // Get all boxes and doors once
-    auto obstacles = _entityManager.getEntities();
-    obstacles.erase(
-        std::remove_if(obstacles.begin(), obstacles.end(), [](auto& e) {
-            std::string tag = e->getTag();
-            return !(tag == "box" || tag == "door");
-            }),
-        obstacles.end()
-    );
-
-    // Check each obstacle in the path
-    for (auto& obstacle : obstacles) {
-        auto& obstaclePos = obstacle->getComponent<CTransform>().pos;
-        auto& obstacleBox = obstacle->getComponent<CBoundingBox>();
-
-        // Check if obstacle horizontally
-        bool inXRange = playerIsRight
-            ? (obstaclePos.x > enemyPos.x && obstaclePos.x < playerPos.x)
-            : (obstaclePos.x < enemyPos.x && obstaclePos.x > playerPos.x);
-
-        
-        bool onSameLevel = std::abs(obstaclePos.y - enemyPos.y) < 50.f;
-
-        if (inXRange && onSameLevel) {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-void Scene_BulletNinja::enemyMovement(sf::Time dt) {
-    if (!m_player) return;
-
-    const float chaseDistance = 500.f;
-    const float attackRange = 60.f;
-
-    auto& playerPos = m_player->getComponent<CTransform>().pos;
-
-    for (auto& enemy : _entityManager.getEntities("enemy")) {
-        if (!enemy->isActive()) continue;
-
-        auto& transform = enemy->getComponent<CTransform>();
-        auto& state = enemy->getComponent<CState>();
-        auto& anim = enemy->getComponent<CAnimation>();
-
-
-        transform.vel.x = 0;
-
-        float xDistance = playerPos.x - transform.pos.x;
-
-        // Skip if out of view
-        if (std::abs(transform.pos.x - m_worldView.getCenter().x) > m_worldView.getSize().x / 2) {
-            state.unSet(CState::isRunning);
-            if (anim.animation.getName() != "SamuraiIdle") {
-                anim.setAnimation(Assets::getInstance().getAnimation("SamuraiIdle"));
-            }
-            continue;
-        }
-
-        // Check for obstacles
-        if (hasObstacleBetween(enemy, playerPos)) {
-            state.unSet(CState::isRunning);
-            if (anim.animation.getName() != "SamuraiIdle") {
-                anim.setAnimation(Assets::getInstance().getAnimation("SamuraiIdle"));
-            }
-            continue;
-        }
-
-        // attck state
-        if (std::abs(xDistance) <= attackRange) {
-            if (!state.test(CState::isAttacking)) {
-                state.set(CState::isAttacking);
-                anim.setAnimation(Assets::getInstance().getAnimation("SamuraiAttackSword"));
-            }
-            continue;
-        }
-
-        // chase player
-        if (std::abs(xDistance) <= chaseDistance) {
-            state.set(CState::isRunning);
-            transform.vel.x = (xDistance > 0) ? m_config.enemySpeed : -m_config.enemySpeed;
-            transform.scale.x = (xDistance > 0) ? std::abs(transform.scale.x) : -std::abs(transform.scale.x);
-
-            if (anim.animation.getName() != "SamuraiRun") {
-                anim.setAnimation(Assets::getInstance().getAnimation("SamuraiRun"));
-            }
-        }
-        else {
-            state.unSet(CState::isRunning);
-            if (anim.animation.getName() != "SamuraiIdle") {
-                anim.setAnimation(Assets::getInstance().getAnimation("SamuraiIdle"));
-            }
-            continue;
-        }
-    }
-}
-
-void Scene_BulletNinja::updateEnemyMovement(std::shared_ptr<Entity> enemy, sf::Vector2f& nextPos,
-    std::string& anim, const std::string& curAnim,
-    CTransform& enemyTransform, const CTransform& playerTransform) {
-    if (!enemy) return; 
-
-    if (!isCollidingWithWalls(enemy, nextPos)) {
-        anim = anim.empty() ? curAnim : anim;
-        if (curAnim != anim) {
-            enemy->addComponent<CAnimation>(Assets::getInstance().getAnimation(anim));
-        }
-        enemyTransform.pos.x = nextPos.x;
-        enemyTransform.pos.y = playerTransform.pos.y;
-    }
-    else {
-        if (curAnim != "SamuraiIdle") {
-            enemy->addComponent<CAnimation>(Assets::getInstance().getAnimation("SamuraiIdle"));
-            return;
-        }
-        enemy->addComponent<CAnimation>(Assets::getInstance().getAnimation("SamuraiIdle"));
-    }
-}
 
 
 
@@ -470,40 +166,14 @@ void Scene_BulletNinja::updateEnemyMovement(std::shared_ptr<Entity> enemy, sf::V
 
 
 
-void Scene_BulletNinja::updateCamera() {
-    auto& playerPos = m_player->getComponent<CTransform>().pos;
-    sf::Vector2f viewSize = m_worldView.getSize();
-
-    float halfViewWidth = viewSize.x / 2.f;
-    float leftBound = halfViewWidth;
-    float rightBound = m_worldBounds.width - halfViewWidth;
-
-    sf::Vector2f newCenter = m_worldView.getCenter();
-
-    
-    if (playerPos.x < leftBound) {
-        newCenter.x = leftBound;
-    }
-    else if (playerPos.x > rightBound) {
-        newCenter.x = rightBound;
-    }
-    else {
-        newCenter.x = playerPos.x; 
-    }
-
-    m_worldView.setCenter(newCenter);
-}
 
 void Scene_BulletNinja::sMovement(sf::Time dt) {
     playerMovement(dt);
-    //adjustEntityMovement(m_player); // in case of box collision
 
     enemyMovement(dt);
-    //for (auto& enemy : _entityManager.getEntities("enemy")) { 
-    //    adjustEntityMovement(enemy); // in case of box collision
-    //}
 
     playerAttacks();
+    flowerEnemyMovement();
 
     // move all objects
     for (auto e : _entityManager.getEntities()) {
@@ -554,84 +224,6 @@ void Scene_BulletNinja::playerCheckState() {
     }
 }
 
-void Scene_BulletNinja::attackCollisions() {
-    const std::unordered_map<std::string, std::vector<std::string>> validTargets = {
-        {"player", {"enemy", "box", "zombie"}},  // Player can attack these
-        {"enemy", {"player"}}                          // Enemies can only attack player
-    };
-
-    for (auto& attacker : _entityManager.getEntities()) {
-        // Skip if attacker can't attack
-        if (!attacker->hasComponent<CAnimation>() ||
-            !attacker->hasComponent<CBoundingBox>() ||
-            !attacker->hasComponent<CScore>()) {
-            continue;
-        }
-
-        auto& attackerAnim = attacker->getComponent<CAnimation>().animation;
-        auto& attackerKey = attacker->getComponent<CAnimation>().key;
-        auto& attackerScore = attacker->getComponent<CScore>();
-
-        // Only check during frames with active attackboxes
-        if (attackerAnim.hasAttackbox()) {
-            sf::FloatRect attackBox = calculateBoundingBox(attacker, BBType::Attackbox);
-            auto attackerTag = attacker->getTag();
-
-            // Skip if no valid targets
-            if (validTargets.count(attackerTag) == 0) continue;
-
-            for (auto& target : _entityManager.getEntities()) {
-                
-                if (target == attacker || !target->isActive()) continue;
-
-                
-                auto targetTag = target->getTag();
-                const auto& targets = validTargets.at(attackerTag);
-                if (std::find(targets.begin(), targets.end(), targetTag) == targets.end()) {
-                    continue;
-                }
-
-                // Check if target can be hit
-                if (!target->hasComponent<CBoundingBox>() ||
-                    (target->hasComponent<CScore>() && target->getComponent<CScore>()._hp <= 0)) {
-                    continue;
-                }
-
-                sf::FloatRect targetBox = calculateBoundingBox(target, BBType::Hitbox);
-
-                if (attackBox.intersects(targetBox)) {
-                    if (target->hasComponent<CScore>()) {
-                        auto& targetLife = target->getComponent<CScore>();
-                        if (attacker->getTag() == "player") {
-                            std::cout << "Player hit " << targetTag << " (Key: " << attackerKey << ")\n";
-                        }
-
-                        if (targetLife.canTakeHit(attackerKey)) {
-                            std::cout << "Hit registered\n";
-                            targetLife.registerHit(attackerKey);
-                            targetLife._hp -= 10;
-                            attackerScore._score += 10;
-
-                            // Handle death/respawn
-                            if (targetLife._hp <= 0) {
-                                targetLife._lives -= 1;
-                                if (targetLife._lives <= 0) {
-                                    target->destroy();
-                                }
-                                else {
-                                    targetLife._hp = targetLife._DefautHp;
-                                }
-                            }
-
-                            std::cout << attackerTag << " hit " << targetTag
-                                << " (Key: " << attackerKey << ")\n";
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
 
 void Scene_BulletNinja::sCollisions() {
     auto players = _entityManager.getEntities("player");
@@ -649,7 +241,7 @@ void Scene_BulletNinja::sCollisions() {
                 continue;
 
             const std::string& tag = e->getTag();
-            if (tag == "player" || tag == "staticObject")
+            if (!e->isActive() || tag == "player" || tag == "staticObject" || tag == "flowerEnemy" || tag=="trophyKey")
                 continue;
 
             
@@ -667,7 +259,7 @@ void Scene_BulletNinja::sCollisions() {
                 sf::Vector2f overlap = Physics::getOverlap(pCurrBB, eCurrBB);
 
                 if (overlap.x > 0.f && overlap.y > 0.f) {
-                    resolveDoorCollision(player, e, overlap);
+                    resolveCollision(player, e, overlap);
                     pCurrBB = calculateBoundingBox(player, BBType::Hitbox); // Update after resolution
                 }
                 continue;
@@ -678,81 +270,40 @@ void Scene_BulletNinja::sCollisions() {
             sf::Vector2f overlap = Physics::getOverlap(pCurrBB, eCurrBB);
 
             if (overlap.x > 0.f && overlap.y > 0.f) {
-                resolveDoorCollision(player, e, overlap);
+                resolveCollision(player, e, overlap);
                 pCurrBB = calculateBoundingBox(player, BBType::Hitbox);
             }
         }
     }
 }
 
-void Scene_BulletNinja::resolveDoorCollision(std::shared_ptr<Entity> player, std::shared_ptr<Entity> door, sf::Vector2f overlap) {
-    auto& pTransform = player->getComponent<CTransform>();
-    auto& pInput = player->getComponent<CInput>();
-    auto& pState = player->getComponent<CState>();
-    auto& eTransform = door->getComponent<CTransform>();
 
-    // Get previous positions
-    sf::FloatRect pPrevBB = calculateBoundingBox(player, BBType::Hitbox);
-    sf::FloatRect ePrevBB = calculateBoundingBox(door, BBType::Hitbox);
-    sf::Vector2f prevOverlap = Physics::getPreviousOverlap(pPrevBB,
-        pTransform.pos - pTransform.prevPos,
-        ePrevBB,
-        eTransform.pos - eTransform.prevPos);
 
-    // check collision direction
-     // Vertical collision
-    if (overlap.y < overlap.x) {
-        if (pTransform.prevPos.y < eTransform.prevPos.y) {
-            
-            pTransform.pos.y -= overlap.y;
-            pTransform.vel.y = 0;
 
-            
-            if (prevOverlap.y <= 0) {  
-                pState.set(CState::isGrounded);
-                pInput.canJump = true;
-            }
-        }
-        else {
-            // Player is below door
-            pTransform.pos.y += overlap.y;
-            pTransform.vel.y = 0;
-        }
-    }
-    else { // Horizontal collision
-        if (pTransform.prevPos.x < eTransform.prevPos.x) {
-            pTransform.pos.x -= overlap.x;
-        }
-        else {
-            pTransform.pos.x += overlap.x;
-        }
-    }
-}
 
 
 
 void Scene_BulletNinja::registerActions() {
-    registerAction(sf::Keyboard::P, "PAUSE");
+    registerAction(sf::Keyboard::Space, "PAUSE");
     registerAction(sf::Keyboard::Escape, "BACK");
     registerAction(sf::Keyboard::Q, "QUIT");
     registerAction(sf::Keyboard::C, "TOGGLE_COLLISION");
+    registerAction(sf::Keyboard::M, "TOGGLE_IN_GAME_MENU");
 
-    //registerAction(sf::Keyboard::A, "LEFT");
-    registerAction(sf::Keyboard::Left, "LEFT");
 
     registerAction(sf::Keyboard::A, "ATTACKSWORD");
     registerAction(sf::Keyboard::S, "ATTACKSPEAR");
 
+    registerAction(sf::Keyboard::Left, "LEFT");
     registerAction(sf::Keyboard::Right, "RIGHT");
-    //registerAction(sf::Keyboard::W, "UP");
     registerAction(sf::Keyboard::Up, "JUMP");
-    
     registerAction(sf::Keyboard::Down, "DOWN");
 }
 
 void Scene_BulletNinja::SpawnStaticObject(std::string name, float x) {
     auto _object = _entityManager.addEntity("staticObject");
     _object->addComponent<CTransform>();
+    _object->getComponent<CState>();
     _object->addComponent<CAnimation>(Assets::getInstance().getAnimation(name));
 
 
@@ -760,51 +311,24 @@ void Scene_BulletNinja::SpawnStaticObject(std::string name, float x) {
     auto& transform = _object->getComponent<CTransform>();
 
     sf::Vector2f spawnPos{ m_worldView.getSize().x / 2.f , m_worldView.getSize().y / 2.f };
-    transform.pos = sf::Vector2f(x, spawnPos.y - 57.f);
+    transform.pos = sf::Vector2f(x, m_ground.pos.y - 100.f);
     transform.scale = sf::Vector2f(1.5f, 1.5f);
 
  
 }
 
-void Scene_BulletNinja::SpawnDoorObject(std::string name, float x, int type, int requiredScore) {
-    auto door = _entityManager.addEntity("door");
 
 
-    door->addComponent<CAnimation>(Assets::getInstance().getAnimation(name));
-    sf::Vector2f spawnPos{ m_worldView.getSize().x / 2.f, m_worldView.getSize().y / 2.f };
-    door->addComponent<CTransform>(sf::Vector2f(x, spawnPos.y - 80.f));
-
-
-    auto& doorState = door->addComponent<CDoorState>();
-    doorState.type = (type == 0) ? CDoorState::Entrance : CDoorState::Exit;
-    doorState.minScoreToOpen = requiredScore;
-    doorState.state = CDoorState::Closed;
-
-
-    door->addComponent<CBoundingBox>(sf::Vector2f{ 20.f, 200.f });
-
-
-    std::cout << "Spawned " << (type == 0 ? "Entrance" : "Exit")
-        << " door at: " << x
-        << " (Requires: " << requiredScore << " points)\n";
-}
 
 void Scene_BulletNinja::sSpawnStaticObjects()
 {
     // spawn enemies when they are half a window above the current camera/view
     auto spawnLine = _game->window().getSize().x;
-    std::cout << "_game->window().getSize().x: " << spawnLine << "\n";
 
     while (!_spawnStaticPoints.empty() && _spawnStaticPoints.top().x > 0 ) {
         SpawnStaticObject(_spawnStaticPoints.top().name, _spawnStaticPoints.top().x);
         _spawnStaticPoints.pop();
     }
-
-    while (!_spawnDoorPoints.empty() && _spawnDoorPoints.top().x > 0) {
-        SpawnDoorObject(_spawnDoorPoints.top().name, _spawnDoorPoints.top().x, _spawnDoorPoints.top().type, _spawnDoorPoints.top().requiredScore);
-        _spawnDoorPoints.pop();
-    }
-
     auto _object = _entityManager.addEntity("ground");
     _object->addComponent<CBoundingBox>();
     _object->addComponent<CTransform>(m_ground.pos);
@@ -829,38 +353,68 @@ void Scene_BulletNinja::loadLevel(const std::string& path) {
             config >> name >> pos.x >> pos.y;
             auto e = _entityManager.addEntity("bkg");
 
-            // for background, no textureRect its just the whole texture
-            // and no center origin, position by top left corner
-            // stationary so no CTransfrom required.
-            /*auto& sprite = e->addComponent<CSprite>(Assets::getInstance().getTexture(name)).sprite;
-            sprite.setOrigin(0.f, 0.f);
-            sprite.setPosition(pos);*/
             
         }
-        else if (token == "World") {
-            config >> m_worldBounds.width >> m_worldBounds.height;
-            
-        }
+        
         else if (token == "Speeds") {
             config >> m_config.cameraReactionSpeed  >> m_config.playerSpeed >> m_config.enemySpeed;
         }
         else if (token == "Tree") {
             SpawnPoint p;
             config >> p.name >> p.x;
-            p.x = p.x;
+            
             _spawnStaticPoints.push(p);
+        }
+        else if (token == "NinjaEnemy") {
+            SpawnEnemyNinjaPoint p;
+            config >> p.x >> p.BBx >> p.BBy >> p.lives >> p.health >> p.level;
+            
+            _spawnEnemyNinjaPoints.push(p);
         }
         else if (token == "Door") {
             SpawnDoorPoint p;
             config >> p.name >> p.x >> p.type;
 
+            // Adjust worlld size
+            if(p.x + m_doorGap > m_worldBounds.width) {
+				m_worldBounds.width = p.x + m_doorGap;
+			}
             // If it's an exit door, read required score
             if (p.type == 1) {
                 config >> p.requiredScore;
+                PlayerProgress::getInstance().incrementLastLevel();
             }
+
+            config >> p.id;
 
             _spawnDoorPoints.push(p);
         }
+		else if (token == "WoodenBox") {
+			SpawnWoodenBoxPoint p;
+			config >> p.x >> p.width >> p.height >> p.level;
+			_spawnWoodenBoxPoints.push(p);
+		}
+        else if (token == "FlowerEnemy") {
+            spawnFlowerEnemyPoint p;
+            config >> p.x >> p.width >> p.height;
+            _spawnFlowerEnemyPoints.push(p);
+        }
+        else if (token == "Tile") {
+			SpawnTilePoint p;
+			config >> p.x >> p.y >> p.width >> p.height;
+			_spawnTilePoints.push(p);
+		}
+		else if (token == "Ground") {
+			config >> m_ground.pos.x >> m_ground.pos.y >> m_ground.width >> m_ground.height;
+		}
+		else if (token == "Player") {
+			config >> token;
+			spawnPlayer(sf::Vector2f{ m_worldView.getSize().x / 2.f, m_worldView.getSize().y / 2.f });
+		}
+		else if (token == "Enemy") {
+			config >> token;
+			spawnEnemy(sf::Vector2f{ m_worldView.getSize().x / 2.f, m_worldView.getSize().y / 2.f });
+		}
         else if (token[0] == '#') {
             std::cout << token;
         }
@@ -890,10 +444,11 @@ void Scene_BulletNinja::sDoAction(const Command& action)
     auto& state = m_player->getComponent<CState>();
 
     if (action.type() == "START") {
-        if (action.name() == "PAUSE") { setPaused(!_isPaused); }
+        if (action.name() == "PAUSE") { _game->quitLevel(); }
         else if (action.name() == "QUIT") { _game->quitLevel(); }
         else if (action.name() == "BACK") { _game->backLevel(); }
         else if (action.name() == "TOGGLE_COLLISION") { m_drawAABB = !m_drawAABB; }
+        else if (action.name() == "TOGGLE_IN_GAME_MENU") { PlayerProgress::getInstance().setIsInGameMenu(); }
 
         // Player control
         else if (action.name() == "LEFT") { m_player->getComponent<CInput>().LEFT = true; }
@@ -957,147 +512,61 @@ void Scene_BulletNinja::updateScore()
 }
 
 
-sf::FloatRect Scene_BulletNinja::calculateBoundingBox(std::shared_ptr<Entity> e, BBType type) {
-    auto box = e->getComponent<CBoundingBox>();
-    auto transform = e->getComponent<CTransform>();
-    auto size = box.size;
-    auto position = transform.pos;
 
-    auto& tag = e->getTag();
-    auto& state = e->getComponent<CState>();
 
-    if (tag == "box") {
-        size = sf::Vector2f{ box.size.x * 2, box.size.y * 2 };
-        position = sf::Vector2f{ position.x, position.y + box.size.y };
-    }
-    else if (tag == "door") {
-		size = sf::Vector2f{ box.size.x * 2, box.size.y * 2 };
-		position = sf::Vector2f{ position.x, position.y + box.size.y };
-	}
-	
-    else if (tag == "ground") {
-        size = sf::Vector2f{ m_ground.width * 3, m_ground.height };
-        position = m_ground.pos;
-    }
-    else if (tag == "player" || tag == "enemy") {
-        if (state.test(CState::isAttackSpear)) {
-            if (type == Hitbox) {
-                size = sf::Vector2f{ box.size.x - 1.f, box.size.y };
-                position = sf::Vector2f{ position.x - (size.x * 0.5f), position.y };
-                if (transform.scale.x == -std::abs(transform.scale.x)) position.x += size.x;
-            }
-            else if (type == Attackbox) {
-                size = sf::Vector2f{ box.size.x * 6.4f, box.size.y + box.size.x };
-                position = sf::Vector2f{ position.x, position.y };
-                if (transform.scale.x == -std::abs(transform.scale.x)) position.x -= 30.f;
-            }
-        }
-        else if (state.test(CState::isAttackSword)) {
-            if (type == Hitbox) {
-                size = sf::Vector2f{ box.size.x - 1.f, box.size.y };
-                position = sf::Vector2f{ position.x - (size.x * 0.5f), position.y };
-                if (transform.scale.x == -std::abs(transform.scale.x)) position.x += size.x;
-            }
-            else if (type == Attackbox) {
-                size = sf::Vector2f{ box.size.x * 5.f, box.size.y + box.size.x };
-                position = sf::Vector2f{ position.x, position.y };
-            }
-        }
-        else if (state.test(CState::isRunning)) {
-            size = sf::Vector2f{ box.size.x - 1.f, box.size.y };
-            position = sf::Vector2f{ position.x - (size.x * 0.5f), position.y };
-            if (transform.scale.x == -std::abs(transform.scale.x)) position.x += size.x;
-        }
-        else if (state.test(CState::isGrounded) || state.test(CState::isJumping)) {
-            size = sf::Vector2f{ box.size.x - 1.f, box.size.y };
-            position = sf::Vector2f{ position.x - (size.x * 0.5f), position.y };
-            if (transform.scale.x == -std::abs(transform.scale.x)) position.x += size.x;
-        }
-        else {
-            size = sf::Vector2f{ box.size.x - 1.f, box.size.y };
-            position = sf::Vector2f{ position.x - (size.x * 0.5f), position.y };
-            if (transform.scale.x == -std::abs(transform.scale.x)) position.x += size.x;
+ 
+
+
+
+
+void Scene_BulletNinja::renderGamePlayBackgroundView()
+{
+    // Get window dimensions
+    sf::Vector2u windowSize = _game->window().getSize();
+    
+    float stripWidth = (windowSize.x - m_sceneDimensions.m_gameplayWidth) / 2.0f;
+
+    // Draw left and right side , easier than drawing the middle
+    if (stripWidth > 0)
+    {
+        
+        _game->window().setView(_game->window().getDefaultView());
+
+        if (PlayerProgress::getInstance().isInGameMenu()) {
+            
+            leftStripMenu(sf::Vector2f(stripWidth, windowSize.y));
+            
+            rightStripMenu(sf::Vector2f(stripWidth, windowSize.y));
+            //
+            
         }
     }
 
-    sf::Vector2f centeredPosition = sf::Vector2f{ position.x - (size.x * 0.5f), position.y - size.y };
-    return sf::FloatRect(centeredPosition, size);
-}
-
-
-
-void Scene_BulletNinja::drawHitbox(std::shared_ptr<Entity> e) {
-    if (!m_drawAABB) return;
-
-    auto& animation = e->getComponent<CAnimation>().animation;
-
     
-    //if (!animation.hasHitbox() && e->getTag() == "box") return;
+    _game->window().setView(m_worldView);
 
-    sf::FloatRect boundingBox = calculateBoundingBox(e, Hitbox);
-    sf::RectangleShape rect;
-    rect.setSize(boundingBox.getSize());
-    //centerOrigin(rect);
-    rect.setPosition(boundingBox.getPosition());
 
-    //std::cout << e->getTag() << "-Box position: " << rect.getGlobalBounds().top + rect.getLocalBounds().height << "\n";  // Delete
-
-    rect.setFillColor(sf::Color(0, 0, 0, 0)); // Transparent
-    rect.setOutlineColor(sf::Color::Green); // Green outline for hitbox
-    rect.setOutlineThickness(2.f);
-
-    _game->window().draw(rect);
+    // Set the gameplay view
+    _game->window().setView(m_worldView);
 }
-
-void Scene_BulletNinja::drawGround(GroundCoord ground) {
-    if (!m_drawAABB) return;
-    sf::FloatRect groundBB(ground.pos.x, ground.pos.y, ground.width, ground.height);
-
-    sf::RectangleShape rect;
-    rect.setSize(groundBB.getSize());
-    //centerOrigin(rect);
-    rect.setPosition(groundBB.getPosition());
-
-    rect.setFillColor(sf::Color::Green); // Transparent
-    rect.setOutlineColor(sf::Color(0, 0, 0, 0)); // Blue outline for attack box
-    rect.setOutlineThickness(4.f);
-
-    _game->window().draw(rect);
-
-}
-
-void Scene_BulletNinja::drawAttackBox(std::shared_ptr<Entity> e) {
-    if (!m_drawAABB) return;
-
-    auto& animation = e->getComponent<CAnimation>().animation;
-    auto& state = e->getComponent<CState>().state;
-    if (!animation.hasAttackbox()) return;
-
-    sf::FloatRect boundingBox = calculateBoundingBox(e, Attackbox);
-    
-    //if (state.find("attack") != std::string::npos) std::cout << "attack box: " << boundingBox.height << "\n";
-    
-    
-    sf::RectangleShape rect;
-    rect.setSize(boundingBox.getSize());
-    //centerOrigin(rect);
-    rect.setPosition(boundingBox.getPosition());
-
-    rect.setFillColor(sf::Color(0, 0, 0, 0)); // Transparent
-    rect.setOutlineColor(sf::Color::Blue); // Blue outline for attack box
-    rect.setOutlineThickness(4.f);
-
-    _game->window().draw(rect);
-}
-
-
-
 
 void Scene_BulletNinja::sRender()
 {
-    _game->window().setView(m_worldView);
+    
+   
+    
+    try {
+        // get shadow shader
+        auto& shadowShader = Assets::getInstance().getShader("shadow");
+        sf::RenderStates shadowStates;
+        shadowStates.shader = &shadowShader;
+        shadowStates.blendMode = sf::BlendAlpha;
 
-    // draw bkg first
+        // Now setUniform will work
+        shadowShader.setUniform("texture", sf::Shader::CurrentTexture);
+        shadowShader.setUniform("offset", sf::Vector2f(5.f, 10.f));
+
+    // Draw background first
     for (auto e : _entityManager.getEntities("bkg")) {
         if (e->getComponent<CSprite>().has) {
             auto& sprite = e->getComponent<CSprite>().sprite;
@@ -1105,26 +574,54 @@ void Scene_BulletNinja::sRender()
         }
     }
 
-    
+    renderTrophyKey();
+
+
+    // Draw entities with animations - WITH SHADOWS
     for (auto& e : _entityManager.getEntities()) {
-        if (!e->hasComponent<CAnimation>())
-            continue;
+            if (!e->isActive() || !e->hasComponent<CAnimation>()) continue;
 
-        // Draw Sprite
-        auto& anim = e->getComponent<CAnimation>().animation;
-        auto& tfm = e->getComponent<CTransform>();
-        anim.getSprite().setPosition(tfm.pos);
-        anim.getSprite().setRotation(tfm.angle);
-        anim.getSprite().setScale(tfm.scale);
-        _game->window().draw(anim.getSprite());
+            auto& anim = e->getComponent<CAnimation>().animation;
+            auto& tfm = e->getComponent<CTransform>();
+            auto& sprite = anim.getSprite();
 
-        //drawAABB(e);
-        drawHitbox(e);
-        drawAttackBox(e);
 
-    }
+            
 
+            // Calculate base shadow position / mirror effect
+            float groundLevel = m_ground.pos.y;
+            float spriteHeight = sprite.getLocalBounds().height;
+            float verticalOffset = 10.0f;
+
+            // Mirror position calculation
+            float shadowY = groundLevel * 2 - verticalOffset;
+
+            
+            float scaleFactor = 1.0f - (tfm.vel.y * 0.004f);
+            scaleFactor = std::clamp(scaleFactor, 0.8f, 1.2f);
+
+            // 4. Apply transforms
+            shadowStates.transform = sf::Transform::Identity;
+            shadowStates.transform.translate(0, shadowY);
+            shadowStates.transform.scale(1.0f, -scaleFactor);
+            shadowStates.transform.rotate(tfm.angle);
+            _game->window().draw(sprite, shadowStates);
+
+            // Draw original sprite
+            sprite.setPosition(tfm.pos);
+            sprite.setRotation(tfm.angle);
+            sprite.setScale(tfm.scale);
+            _game->window().draw(sprite);
+
+            drawHitbox(e);
+            drawAttackBox(e);
+        }
+
+    
+
+    // Draw boxes
     for (auto e : _entityManager.getEntities("box")) {
+        if (!e->isActive()) continue;
         if (e->getComponent<CSprite>().has) {
             auto& anim = e->getComponent<CSprite>().sprite;
             auto& tfm = e->getComponent<CTransform>();
@@ -1132,74 +629,101 @@ void Scene_BulletNinja::sRender()
             anim.setRotation(tfm.angle);
             anim.setScale(tfm.scale);
 
-            //drawAABB(e);
             drawHitbox(e);
             drawAttackBox(e);
-
             _game->window().draw(anim);
         }
     }
 
+    renderHealthIndicators();
     drawGround(m_ground);
+    DrawTiles();
+    
+    renderKeyIndicator();
+    
 
-    _game->window().setView(_game->window().getDefaultView());
+    
 
-    auto& score = m_player->getComponent<CScore>();
+    
+    renderWasted();
+    renderLevelComplete();
+    renderGameComplete();
 
-    m_text.setPosition(5.0f, -5.0f);
-    m_text.setString("score  " + std::to_string(score._score));
-    _game->window().draw(m_text);
 
-    int time = static_cast<int>(std::ceil(m_timer.asSeconds()));
 
-    m_text.setPosition(5.0f, 22.5f);
-    m_text.setString("Current HP  " + std::to_string(score._hp));
-    _game->window().draw(m_text);
+    }
+    catch (const std::exception& e) {
+        std::cerr << "Shader error: " << e.what() << std::endl;
+        
+        // fal back
+    }
 
-    m_text.setPosition(5.0f, 52.5f);
-    m_text.setString("Lives  " + std::to_string(score._lives));
-
-    _game->window().draw(m_text);
-
-    if(m_nearestExitDoor) {
-		auto& doorTransform = m_nearestExitDoor->getComponent<CTransform>();
-		auto& doorState = m_nearestExitDoor->getComponent<CDoorState>();
-
-		m_text.setPosition(5.0f, 82.5f);
-		m_text.setString("Level requirement: " + std::to_string(doorState.minScoreToOpen) + " points)");
-		_game->window().draw(m_text);
-	}
+    renderGamePlayBackgroundView();
 }
 
 void Scene_BulletNinja::sUpdate(sf::Time dt) {
     SoundPlayer::getInstance().removeStoppedSounds();
     _entityManager.update();
+    updateDeadEnties(); // Todo- fix this for a long time
 
     if (m_lives <= 0 || m_reachGoal >= 5)
         _game->quitLevel();
 
-    if (_isPaused)
+    if (PlayerProgress::getInstance().isPaused())
         return;
     auto& anim = m_player->getComponent<CAnimation>();
     auto& state = m_player->getComponent<CState>();
-
-
-
-    /*m_timer -= dt;
-
-    if (m_timer.asSeconds() <= 0)
-        killPlayer();*/
 
     checkPlayerState();
 
     sAnimation(dt);
     sMovement(dt);
     attackCollisions();
-    updateDoors();
-    sCollisions();
+    updateDoors(dt);
 
+    checkAndAppyGravity();
+    sCollisions();
+    updateHits(dt);
+    updateKeyLocation(dt);
     
     updateScore();
+    updateRespawns(dt);
+
+
+
+    auto& wasted = m_player->getComponent<CWasted>();
+    auto& levelComplete = m_player->getComponent<CLevelComplete>();
+    auto& gameComplete = m_player->getComponent<CGameComplete>();
+    if(wasted.isWasted == true){
+        wasted.update(dt);
+    }
+    if (levelComplete.isActive == true) {
+        levelComplete.update(dt);
+    }
+    if (gameComplete.isActive == true) {
+        gameComplete.update(dt);
+    }
+}
+
+void Scene_BulletNinja::updateDeadEnties() {
+	for (auto e : _entityManager.getEntities()) {
+		if (!e->isActive() && e->hasComponent<CTransform>()) {
+			auto& transform = e->getComponent<CTransform>();
+			transform.vel = sf::Vector2f(0, 0);
+		}
+	}
+
+}
+
+void Scene_BulletNinja::updateHits(sf::Time dt) {
+    for (auto e : _entityManager.getEntities()) {
+        if (!e->hasComponent<CHitEffect>()) continue;
+
+        auto& state = e->getComponent<CState>();
+
+        auto& hitEffect = e->getComponent<CHitEffect>();
+        hitEffect.update(dt, e->getComponent<CAnimation>().animation.getSprite(), state);
+    }
 }
 
 
@@ -1210,7 +734,8 @@ void Scene_BulletNinja::sAnimation(sf::Time dt) {
         // update all animations
         if (e->hasComponent<CAnimation>()) {
             auto& animation = e->getComponent<CAnimation>().animation;
-
+            // Don't animate door at start
+            if(animation.getName() == "door" && e->getComponent<CDoorState>().state == CDoorState::Closed && animation.getCurFrame() == 0) continue;
             
 
             animation.update(dt);
@@ -1218,6 +743,7 @@ void Scene_BulletNinja::sAnimation(sf::Time dt) {
         }
     }
 }
+
 
 
 void Scene_BulletNinja::adjustPlayerPosition() {
@@ -1283,78 +809,4 @@ bool Scene_BulletNinja::isOnGroundOrPlatforms(const sf::FloatRect& entityBB,
 }
 
 
-void Scene_BulletNinja::updateDoors() {
-    if (!m_player) return;
-
-    const float activationDistance = 150.f;
-    auto& playerPos = m_player->getComponent<CTransform>().pos;
-
-    float minXDifference = FLT_MAX; 
-
-    auto playerX = m_player->getComponent<CTransform>().pos.x;
-
-    // check on x axis
-    for (auto& door : _entityManager.getEntities("door")) {
-        if (!door->hasComponent<CDoorState>()) continue;
-
-        auto& doorState = door->getComponent<CDoorState>();
-        if (doorState.type != CDoorState::Exit) continue;
-
-        float doorX = door->getComponent<CTransform>().pos.x;
-        float xDiff = std::abs(doorX - playerX);
-
-        if (xDiff < minXDifference) {
-            minXDifference = xDiff;
-            m_nearestExitDoor = door;
-        }
-    }
-
-    for (auto& door : _entityManager.getEntities("door")) {
-        if (!door->hasComponent<CDoorState>() || !door->hasComponent<CAnimation>()) {
-            continue;
-        }
-
-        auto& doorState = door->getComponent<CDoorState>();
-        auto& doorTransform = door->getComponent<CTransform>();
-        auto& doorAnim = door->getComponent<CAnimation>().animation;
-        auto& doorBox = door->getComponent<CBoundingBox>();
-        float distance = std::abs(playerPos.x - doorTransform.pos.x);
-
-        bool shouldOpen = distance <= activationDistance;
-
-        // Only change state if needed
-        if ((shouldOpen && doorState.state == CDoorState::Closed) ||
-            (!shouldOpen && doorState.state == CDoorState::Open)) {
-
-            doorState.state = shouldOpen ? CDoorState::Open : CDoorState::Closed;
-            doorAnim.setReversed(!shouldOpen);
-
-            if (shouldOpen) {
-                doorAnim.playForward();
-            }
-            else {
-                doorAnim.playBackward();
-            }
-        }
-
-        // create animation from frame progress
-        if (doorState.state == CDoorState::Opening || doorState.state == CDoorState::Closing) {
-            
-            float progress = static_cast<float>(doorAnim.getCurFrame()) / doorAnim.getFramesSize();
-            if (doorState.state == CDoorState::Closing) {
-                progress = 1.f - progress;
-            }
-            doorBox.halfSize.x = 20.f * (1.f - progress); // Width reduces as door opens
-        }
-        else if (doorAnim.hasEnded()) {
-            // Final state after animation completes
-            if (doorState.state == CDoorState::Open) {
-                doorBox.halfSize = sf::Vector2f(0.f, 0.f); // set Fully open
-            }
-            else {
-                doorBox.halfSize = sf::Vector2f(20.f, 200.f); // set closed
-            }
-        }
-    }
-}
 

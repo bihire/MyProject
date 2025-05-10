@@ -212,15 +212,29 @@
     <ClCompile Include="Command.cpp" />
     <ClCompile Include="Entity.cpp" />
     <ClCompile Include="EntityManager.cpp" />
+    <ClCompile Include="FlowerEnemy.cpp" />
     <ClCompile Include="GameEngine.cpp" />
+    <ClCompile Include="InGameMenu.cpp" />
+    <ClCompile Include="key.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MenuCard.cpp" />
+    <ClCompile Include="MenuCategory.cpp" />
+    <ClCompile Include="MenuItem.cpp" />
     <ClCompile Include="MusicPlayer.cpp" />
+    <ClCompile Include="NinjaEnemy.cpp" />
+    <ClCompile Include="NinjaPlayer.cpp" />
     <ClCompile Include="Physics.cpp" />
+    <ClCompile Include="PlayerProgress.cpp" />
+    <ClCompile Include="QuestDoor.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Scene_BulletNinja.cpp" />
+    <ClCompile Include="Scene_BulletNinja_Collisions.cpp" />
+    <ClCompile Include="Scene_BulletNinja_Utils.cpp" />
     <ClCompile Include="Scene_Menu.cpp" />
     <ClCompile Include="SoundPlayer.cpp" />
+    <ClCompile Include="Tile.cpp" />
     <ClCompile Include="Utilities.cpp" />
+    <ClCompile Include="WoodenBox.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Animation.h" />
@@ -231,8 +245,11 @@
     <ClInclude Include="EntityManager.h" />
     <ClInclude Include="GameEngine.h" />
     <ClInclude Include="json.hpp" />
+    <ClInclude Include="MenuCard.h" />
+    <ClInclude Include="MenuCategory.h" />
     <ClInclude Include="MusicPlayer.h" />
     <ClInclude Include="Physics.h" />
+    <ClInclude Include="PlayerProgress.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Scene_BulletNinja.h" />
     <ClInclude Include="Scene_Menu.h" />
@@ -241,6 +258,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Program.cs" />
+    <None Include="shadow.frag" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -37,6 +37,7 @@ public:
 	void changeScene(const std::string& sceneName,
                      std::shared_ptr<Scene> scene,
                      bool endCurrentScene = false);
+	bool				sceneExists(const std::string& sceneName) const;
 
 	void				quit();
 	void				run();

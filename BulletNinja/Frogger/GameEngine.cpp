@@ -7,6 +7,7 @@
 #include <memory>
 #include <cstdlib>
 #include <iostream>
+#include "PlayerProgress.h"
 
 
 GameEngine::GameEngine(const std::string& path)
@@ -27,6 +28,8 @@ void GameEngine::init(const std::string& path)
 	if (windowType == "fullscreen") {
 		sf::VideoMode desktopMode = sf::VideoMode::getDesktopMode();
 		_window.create(desktopMode, "BULET NINJA", sf::Style::Fullscreen);
+
+
 	} else _window.create(sf::VideoMode(width, height), "GEX Bullet Ninja - Bihire Jules Boris");
 
 
@@ -132,7 +135,7 @@ void GameEngine::run()
 			currentScene()->update(SPF);			// update world
 			timeSinceLastUpdate -= SPF;
 		}
-		window().clear(sf::Color(35, 35, 35));
+		window().clear(sf::Color(150, 150, 180));
 		currentScene()->sRender();					// render world
 
 		// draw stats
@@ -143,10 +146,12 @@ void GameEngine::run()
 }
 
 void GameEngine::quitLevel() {
-	changeScene("MENU", nullptr, true);
+	PlayerProgress::getInstance().setPaused(true);
+	changeScene("MENU", nullptr, false);
 }
 
 void GameEngine::backLevel() {
+	PlayerProgress::getInstance().setPaused(false);
 	changeScene("MENU", nullptr, false);
 
 }
@@ -166,3 +171,8 @@ bool GameEngine::isRunning()
 {
 	return (_running && _window.isOpen());
 }
+
+bool GameEngine::sceneExists(const std::string& sceneName) const {
+	return _sceneMap.find(sceneName) != _sceneMap.end();
+}
+

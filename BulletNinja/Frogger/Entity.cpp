@@ -24,3 +24,9 @@ const std::string &Entity::getTag() const {
 bool Entity::isActive() const {
     return _active;
 }
+
+void Entity::respawn()
+{
+	_active = true;
+
+}

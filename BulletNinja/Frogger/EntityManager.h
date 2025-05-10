@@ -29,6 +29,7 @@ private:
 
     void		    removeDeadEntities(EntityVec& v);
 
+
 public:
     EntityManager();
 
@@ -37,6 +38,7 @@ public:
     EntityVec& getEntities(const std::string& tag);
 
     void                            update();
+    void		                    clearDeadEntities();
 };
 
 

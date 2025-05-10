@@ -119,6 +119,10 @@ void Animation::setHitboxFrames(int start, int end) {
 }
 
 void Animation::setAttackboxFrames(int start, int end) {
+    if(start == end) {
+		_attackboxFrames.clear();
+		return;
+	}
     _attackboxFrames.clear();
     for (int i = start; i <= end; ++i) {
         _attackboxFrames.push_back(i);

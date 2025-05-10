@@ -1,4 +1,6 @@
 #include "Scene.h"
+#include <fstream>
+#include <iostream>
 
 
 Scene::Scene(GameEngine* gameEngine) : _game(gameEngine)

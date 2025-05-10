@@ -13,7 +13,7 @@
 // forward declarations
 class EntityManager;
 
-using ComponentTuple = std::tuple<CSprite, CAnimation, CState, CTransform, CBoundingBox, CInput, CJump, CScore, CDoorState>;
+using ComponentTuple = std::tuple<CSprite, CAnimation, CGameComplete, CLevelComplete, CEnemyAI, CState, CTransform, CBoundingBox, CInput, CJump, CScore, CDoorState, CMenuItem, ExtendedInfo, CHitEffect, CHealthBarIndicator, CLevel, CWasted, CKeyState, CRespawn>;
 
 class Entity {
 private:
@@ -31,6 +31,7 @@ public:
     const size_t&           getId() const;
     const std::string&      getTag() const;
     bool                    isActive() const;
+    void                    respawn();
 
 
 
