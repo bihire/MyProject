@@ -1,0 +1,204 @@
+{
+  "frames": [
+    {
+      "filename": "floweridle (0).png",
+      "frame": { "x": 0, "y": 0, "w": 128, "h": 96 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 128, "h": 96 },
+      "sourceSize": { "w": 128, "h": 96 }
+    },
+    {
+      "filename": "flowermove (1).png",
+      "frame": { "x": 128, "y": 0, "w": 128, "h": 96 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 128, "h": 96 },
+      "sourceSize": { "w": 128, "h": 96 }
+    },
+    {
+      "filename": "flowermove (2).png",
+      "frame": { "x": 256, "y": 0, "w": 128, "h": 96 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 128, "h": 96 },
+      "sourceSize": { "w": 128, "h": 96 }
+    },
+    {
+      "filename": "flowermove (3).png",
+      "frame": { "x": 384, "y": 0, "w": 128, "h": 96 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 128, "h": 96 },
+      "sourceSize": { "w": 128, "h": 96 }
+    },
+    {
+      "filename": "flowermove (4).png",
+      "frame": { "x": 512, "y": 0, "w": 128, "h": 96 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 128, "h": 96 },
+      "sourceSize": { "w": 128, "h": 96 }
+    },
+    {
+      "filename": "flowermove (5).png",
+      "frame": { "x": 0, "y": 96, "w": 128, "h": 96 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 128, "h": 96 },
+      "sourceSize": { "w": 128, "h": 96 }
+    },
+    {
+      "filename": "flowerattack (6).png",
+      "frame": { "x": 128, "y": 96, "w": 128, "h": 96 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 128, "h": 96 },
+      "sourceSize": { "w": 128, "h": 96 }
+    },
+    {
+      "filename": "flowerattack (7).png",
+      "frame": { "x": 256, "y": 96, "w": 128, "h": 96 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 128, "h": 96 },
+      "sourceSize": { "w": 128, "h": 96 }
+    },
+    {
+      "filename": "flowerattack (8).png",
+      "frame": { "x": 384, "y": 96, "w": 128, "h": 96 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 128, "h": 96 },
+      "sourceSize": { "w": 128, "h": 96 }
+    },
+    {
+      "filename": "flowerattack (9).png",
+      "frame": { "x": 512, "y": 96, "w": 128, "h": 96 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 128, "h": 96 },
+      "sourceSize": { "w": 128, "h": 96 }
+    },
+    {
+      "filename": "flowerattack (10).png",
+      "frame": { "x": 0, "y": 192, "w": 128, "h": 96 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 128, "h": 96 },
+      "sourceSize": { "w": 128, "h": 96 }
+    },
+    {
+      "filename": "flowerattack (11).png",
+      "frame": { "x": 128, "y": 192, "w": 128, "h": 96 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 128, "h": 96 },
+      "sourceSize": { "w": 128, "h": 96 }
+    },
+    {
+      "filename": "flowerattack (12).png",
+      "frame": { "x": 256, "y": 192, "w": 128, "h": 96 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 128, "h": 96 },
+      "sourceSize": { "w": 128, "h": 96 }
+    },
+    {
+      "filename": "flowerattack (13).png",
+      "frame": { "x": 384, "y": 192, "w": 128, "h": 96 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 128, "h": 96 },
+      "sourceSize": { "w": 128, "h": 96 }
+    },
+    {
+      "filename": "flowerattack (14).png",
+      "frame": { "x": 512, "y": 192, "w": 128, "h": 96 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 128, "h": 96 },
+      "sourceSize": { "w": 128, "h": 96 }
+    },
+    {
+      "filename": "flowerattack (15).png",
+      "frame": { "x": 0, "y": 288, "w": 128, "h": 96 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 128, "h": 96 },
+      "sourceSize": { "w": 128, "h": 96 }
+    },
+    {
+      "filename": "flowerattack (16).png",
+      "frame": { "x": 128, "y": 288, "w": 128, "h": 96 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 128, "h": 96 },
+      "sourceSize": { "w": 128, "h": 96 }
+    },
+    {
+      "filename": "flowerattack (17).png",
+      "frame": { "x": 256, "y": 288, "w": 128, "h": 96 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 128, "h": 96 },
+      "sourceSize": { "w": 128, "h": 96 }
+    },
+    {
+      "filename": "flowerhit (18).png",
+      "frame": { "x": 0, "y": 96, "w": 128, "h": 96 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 128, "h": 96 },
+      "sourceSize": { "w": 128, "h": 96 }
+    },
+    {
+      "filename": "flowerhit (19).png",
+      "frame": { "x": 384, "y": 288, "w": 128, "h": 96 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 128, "h": 96 },
+      "sourceSize": { "w": 128, "h": 96 }
+    },
+    {
+      "filename": "flowerdeath (20).png",
+      "frame": { "x": 0, "y": 96, "w": 128, "h": 96 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 128, "h": 96 },
+      "sourceSize": { "w": 128, "h": 96 }
+    },
+    {
+      "filename": "flowerdeath (21).png",
+      "frame": { "x": 512, "y": 288, "w": 128, "h": 96 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 128, "h": 96 },
+      "sourceSize": { "w": 128, "h": 96 }
+    },
+    {
+      "filename": "flowerdeath (22).png",
+      "frame": { "x": 0, "y": 384, "w": 128, "h": 96 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 128, "h": 96 },
+      "sourceSize": { "w": 128, "h": 96 }
+    },
+    {
+      "filename": "flowerdeath (23).png",
+      "frame": { "x": 0, "y": 384, "w": 128, "h": 96 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 128, "h": 96 },
+      "sourceSize": { "w": 128, "h": 96 }
+    }
+  ],
+  "meta": {
+    "app": "https://www.aseprite.org/",
+    "version": "1.3.11-x64",
+    "image": "FlowerEnemy.png",
+    "format": "RGBA8888",
+    "size": { "w": 640, "h": 480 },
+    "scale": "1"
+  }
+}

@@ -2,67 +2,67 @@
   "frames": [
     {
       "filename": "PlayerRun (0).png",
-      "frame": { "x": 0, "y": 0, "w": 192, "h": 192 },
+      "frame": { "x": 0, "y": 0, "w": 192, "h": 96 },
       "rotated": false,
       "trimmed": false,
-      "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
-      "sourceSize": { "w": 192, "h": 192 }
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 96 },
+      "sourceSize": { "w": 192, "h": 96 }
     },
     {
       "filename": "PlayerRun (1).png",
-      "frame": { "x": 192, "y": 0, "w": 192, "h": 192 },
+      "frame": { "x": 192, "y": 0, "w": 192, "h": 96 },
       "rotated": false,
       "trimmed": false,
-      "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
-      "sourceSize": { "w": 192, "h": 192 }
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 96 },
+      "sourceSize": { "w": 192, "h": 96 }
     },
     {
       "filename": "PlayerRun (2).png",
-      "frame": { "x": 384, "y": 0, "w": 192, "h": 192 },
+      "frame": { "x": 384, "y": 0, "w": 192, "h": 96 },
       "rotated": false,
       "trimmed": false,
-      "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
-      "sourceSize": { "w": 192, "h": 192 }
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 96 },
+      "sourceSize": { "w": 192, "h": 96 }
     },
     {
       "filename": "PlayerRun (3).png",
-      "frame": { "x": 0, "y": 192, "w": 192, "h": 192 },
+      "frame": { "x": 0, "y": 192, "w": 192, "h": 96 },
       "rotated": false,
       "trimmed": false,
-      "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
-      "sourceSize": { "w": 192, "h": 192 }
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 96 },
+      "sourceSize": { "w": 192, "h": 96 }
     },
     {
       "filename": "PlayerRun (4).png",
-      "frame": { "x": 192, "y": 192, "w": 192, "h": 192 },
+      "frame": { "x": 192, "y": 192, "w": 192, "h": 96 },
       "rotated": false,
       "trimmed": false,
-      "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
-      "sourceSize": { "w": 192, "h": 192 }
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 96 },
+      "sourceSize": { "w": 192, "h": 96 }
     },
     {
       "filename": "PlayerRun (5).png",
-      "frame": { "x": 384, "y": 192, "w": 192, "h": 192 },
+      "frame": { "x": 384, "y": 192, "w": 192, "h": 96 },
       "rotated": false,
       "trimmed": false,
-      "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
-      "sourceSize": { "w": 192, "h": 192 }
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 96 },
+      "sourceSize": { "w": 192, "h": 96 }
     },
     {
       "filename": "PlayerRun (6).png",
-      "frame": { "x": 0, "y": 384, "w": 192, "h": 192 },
+      "frame": { "x": 0, "y": 384, "w": 192, "h": 96 },
       "rotated": false,
       "trimmed": false,
-      "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
-      "sourceSize": { "w": 192, "h": 192 }
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 96 },
+      "sourceSize": { "w": 192, "h": 96 }
     },
     {
       "filename": "PlayerRun (7).png",
-      "frame": { "x": 192, "y": 384, "w": 192, "h": 192 },
+      "frame": { "x": 192, "y": 384, "w": 192, "h": 96 },
       "rotated": false,
       "trimmed": false,
-      "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 192 },
-      "sourceSize": { "w": 192, "h": 192 }
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 96 },
+      "sourceSize": { "w": 192, "h": 96 }
     }
   ],
   "meta": {
